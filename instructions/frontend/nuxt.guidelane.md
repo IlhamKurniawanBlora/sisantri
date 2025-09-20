@@ -85,7 +85,7 @@ export default defineNuxtConfig({
 	runtimeConfig: {
 		public: {
 			supabaseUrl: process.env.SUPABASE_URL,
-			supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+			supabaseKey: process.env.SUPABASE_ANON_KEY,
 		},
 		supabaseServiceRole: process.env.SUPABASE_SERVICE_ROLE_KEY // server-only
 	}
@@ -105,7 +105,7 @@ import { createClient } from '@supabase/supabase-js'
 
 export default defineNuxtPlugin(() => {
 	const config = useRuntimeConfig()
-	const supabase = createClient(config.public.supabaseUrl, config.public.supabaseAnonKey)
+	const supabase = createClient(config.public.supabaseUrl, config.public.supabaseKey)
 	return { provide: { supabase } }
 })
 

@@ -57,8 +57,23 @@ Pengunjung dapat membaca berita atau informasi terbaru yang dipublikasikan oleh 
 ---
 
 ## Struktur Folder (Informasi Umum)
-- `app/pages/` : Berisi halaman utama, data santri, blog, dan about
-- `app/components/` : Komponen tampilan aplikasi
-- `app/layouts/` : Layout aplikasi
-- `public/` : File statis seperti gambar, favicon, dll
  
+## Supabase setup
+
+1. Copy `.env.example` to `.env` and fill the values from your Supabase project.
+
+2. Install dependencies (using pnpm recommended):
+
+```powershell
+pnpm install
+```
+
+3. Run development server:
+
+```powershell
+pnpm dev
+```
+
+Notes:
+- The project injects a client-side Supabase instance via `app/plugins/supabase.client.ts`.
+- Server-side utilities can use `server/utils/supabase.server.ts` which uses the service role key.

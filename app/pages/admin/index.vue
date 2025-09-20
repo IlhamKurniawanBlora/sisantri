@@ -1,3 +1,69 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'admin',
+  title: 'Dashboard'
+})
+
+useHead({
+  title: 'Dashboard Admin'
+})
+
+const stats = [
+  {
+    label: 'Total Santri',
+    value: '1,247',
+    change: '+12% bulan ini',
+    trend: 'up',
+    icon: 'i-heroicons-users'
+  },
+  {
+    label: 'Santri Aktif',
+    value: '1,189',
+    change: '+5% bulan ini',
+    trend: 'up',
+    icon: 'i-heroicons-user-check'
+  },
+  {
+    label: 'Total Berita',
+    value: '89',
+    change: '+3 berita baru',
+    trend: 'up',
+    icon: 'i-heroicons-newspaper'
+  },
+  {
+    label: 'Alumni',
+    value: '58',
+    change: '+2 bulan ini',
+    trend: 'up',
+    icon: 'i-heroicons-academic-cap'
+  }
+]
+
+const recentActivities = [
+  {
+    id: 1,
+    title: 'Santri baru ditambahkan: Ahmad Fauzi',
+    time: '2 jam yang lalu',
+    icon: 'i-heroicons-user-plus',
+    color: 'text-green-600'
+  },
+  {
+    id: 2,
+    title: 'Berita baru dipublikasi: "Kegiatan Ramadan"',
+    time: '4 jam yang lalu',
+    icon: 'i-heroicons-newspaper',
+    color: 'text-blue-600'
+  },
+  {
+    id: 3,
+    title: 'Data santri diperbarui: Muhammad Rizki',
+    time: '1 hari yang lalu',
+    icon: 'i-heroicons-pencil-square',
+    color: 'text-yellow-600'
+  }
+]
+</script>
+
 <template>
   <div>
     <!-- Page Header -->
@@ -92,68 +158,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-definePageMeta({
-  layout: 'admin',
-  title: 'Dashboard'
-})
-
-useHead({
-  title: 'Dashboard Admin'
-})
-
-const stats = [
-  {
-    label: 'Total Santri',
-    value: '1,247',
-    change: '+12% bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-users'
-  },
-  {
-    label: 'Santri Aktif',
-    value: '1,189',
-    change: '+5% bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-user-check'
-  },
-  {
-    label: 'Total Berita',
-    value: '89',
-    change: '+3 berita baru',
-    trend: 'up',
-    icon: 'i-heroicons-newspaper'
-  },
-  {
-    label: 'Alumni',
-    value: '58',
-    change: '+2 bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-academic-cap'
-  }
-]
-
-const recentActivities = [
-  {
-    id: 1,
-    title: 'Santri baru ditambahkan: Ahmad Fauzi',
-    time: '2 jam yang lalu',
-    icon: 'i-heroicons-user-plus',
-    color: 'text-green-600'
-  },
-  {
-    id: 2,
-    title: 'Berita baru dipublikasi: "Kegiatan Ramadan"',
-    time: '4 jam yang lalu',
-    icon: 'i-heroicons-newspaper',
-    color: 'text-blue-600'
-  },
-  {
-    id: 3,
-    title: 'Data santri diperbarui: Muhammad Rizki',
-    time: '1 hari yang lalu',
-    icon: 'i-heroicons-pencil-square',
-    color: 'text-yellow-600'
-  }
-]
-</script>

@@ -1,24 +1,34 @@
-<script lang="ts" setup>
-
-const menuOpen = ref(false);
+<script setup lang="ts">
+// Meta configuration
+useHead({
+  htmlAttrs: {
+    lang: 'id'
+  },
+  link: [
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com'
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.gstatic.com',
+      crossorigin: ''
+    }
+  ]
+})
 </script>
 
 <template>
-    <div class="layout">
-        <header class="header">
-            <div class="container">
-                <NuxtLink to="/" class="logo">Sisantri</NuxtLink>
-
-                <nav :class="['nav', { open: menuOpen }]" @click.outside="menuOpen = false"></nav>
-            </div>
-        </header>
-        <main class="main">
-            <NuxtPage />
-        </main>
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2024 Sisantri. All rights reserved.</p>
-            </div>
-        </footer>
-    </div>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <AppHeader />
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      <slot />
+    </main>
+    
+    <!-- Footer -->
+    <AppFooter />
+  </div>
 </template>
