@@ -18,7 +18,7 @@ const items = computed<NavigationMenuItem[]>(() => [
   },
   {
     label: 'Blog',
-    to: '/blog',
+    to: '/blogs',
     icon: 'i-lucide-newspaper',
     active: route.path.startsWith('/blog')
   }

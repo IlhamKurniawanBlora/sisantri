@@ -1,3 +1,6 @@
+// server/api/blogs/index.get.ts
+import { serverSupabase } from '../../utils/supabase'
+
 interface BlogQuery {
   page?: number
   limit?: number
@@ -10,8 +13,9 @@ interface BlogQuery {
 
 export default defineEventHandler(async (event) => {
   try {
-    const { $supabase: supabase } = useNuxtApp() as any
+    const supabase = serverSupabase()
     const query = getQuery(event) as BlogQuery
+
     const {
       page = 1,
       limit = 10,
@@ -24,42 +28,41 @@ export default defineEventHandler(async (event) => {
 
     let supabaseQuery = supabase
       .from('blogs')
-      .select(`
+      .select(
+        `
         *,
         profiles:author_id (
           id,
           full_name,
           avatar_url
         )
-      `, { count: 'exact' })
+      `,
+        { count: 'exact' }
+      )
 
-    // Filter out soft-deleted records unless explicitly requested
     if (!includeDeleted) {
       supabaseQuery = supabaseQuery.is('deleted_at', null)
     }
 
-    // Apply search filter
     if (search) {
-      supabaseQuery = supabaseQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%,content.ilike.%${search}%`)
+      supabaseQuery = supabaseQuery.or(
+        `title.ilike.%${search}%,description.ilike.%${search}%,content.ilike.%${search}%`
+      )
     }
 
-    // Apply category filter
     if (category) {
       supabaseQuery = supabaseQuery.eq('category', category)
     }
 
-    // Apply tags filter
     if (tags) {
-      const tagArray = tags.split(',').map(tag => tag.trim())
+      const tagArray = tags.split(',').map((tag) => tag.trim())
       supabaseQuery = supabaseQuery.overlaps('tags', tagArray)
     }
 
-    // Apply author filter
     if (author_id) {
       supabaseQuery = supabaseQuery.eq('author_id', author_id)
     }
 
-    // Apply pagination
     const from = (Number(page) - 1) * Number(limit)
     const to = from + Number(limit) - 1
 
@@ -86,10 +89,11 @@ export default defineEventHandler(async (event) => {
         totalPages: Math.ceil((count || 0) / Number(limit))
       }
     }
-  } catch (error: any) {
+  } catch (err: any) {
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || 'Internal server error'
+      statusCode: err?.statusCode || 500,
+      statusMessage:
+        err?.statusMessage || err?.message || 'Internal server error'
     })
   }
 })

@@ -1,3 +1,5 @@
+import { serverSupabase } from '../../utils/supabase'
+
 interface SantriQuery {
   page?: number
   limit?: number
@@ -8,7 +10,7 @@ interface SantriQuery {
 
 export default defineEventHandler(async (event) => {
   try {
-    const { $supabase: supabase } = useNuxtApp() as any
+    const supabase = serverSupabase()
 
     const query = getQuery(event) as SantriQuery
     const {

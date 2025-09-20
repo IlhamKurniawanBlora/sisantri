@@ -120,7 +120,7 @@ interface Feature {
             <UIcon name="i-heroicons-users" class="mr-2" />
             Cari Data Santri
           </UButton>
-          <UButton to="/blog" variant="outline" color="primary" size="lg">
+          <UButton to="/blogs" variant="outline" color="primary" size="lg">
             <UIcon name="i-heroicons-newspaper" class="mr-2" />
             Baca Berita
             </UButton>

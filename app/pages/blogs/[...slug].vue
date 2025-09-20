@@ -21,7 +21,7 @@
       <p class="text-gray-600 dark:text-gray-400 mb-8">
         Artikel yang Anda cari tidak ditemukan atau telah dihapus.
       </p>
-      <UButton to="/blog" variant="outline">
+      <UButton to="/blogs" variant="outline">
         <UIcon name="i-heroicons-arrow-left" class="mr-2" />
         Kembali ke Blog
       </UButton>
@@ -35,7 +35,7 @@
           Beranda
         </NuxtLink>
         <UIcon name="i-heroicons-chevron-right" class="h-4 w-4" />
-        <NuxtLink to="/blog" class="hover:text-primary-600 transition-colors">
+        <NuxtLink to="/blogs" class="hover:text-primary-600 transition-colors">
           Blog
         </NuxtLink>
         <UIcon name="i-heroicons-chevron-right" class="h-4 w-4" />
@@ -145,7 +145,7 @@
           {{ previousPost.judul.length > 50 ? previousPost.judul.substring(0, 50) + '...' : previousPost.judul }}
         </UButton>
         
-        <UButton to="/blog" variant="ghost">
+        <UButton to="/blogs" variant="ghost">
           <UIcon name="i-heroicons-squares-2x2" class="mr-2" />
           Semua Artikel
         </UButton>

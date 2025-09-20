@@ -15,7 +15,7 @@
             <UIcon name="i-heroicons-users" class="mr-2" />
             Lihat Data Santri
           </UButton>
-          <UButton size="lg" variant="outline" to="/blog">
+          <UButton size="lg" variant="outline" to="/blogs">
             <UIcon name="i-heroicons-newspaper" class="mr-2" />
             Baca Berita
           </UButton>
