@@ -1,174 +1,213 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
-import type { TableColumn } from '@nuxt/ui'
-import type { Row } from '@tanstack/vue-table'
-import { useClipboard } from '@vueuse/core'
+import { ref, computed, watch } from 'vue'
 
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
+const page = ref(1)
+const limit = ref(12) // Increased limit for better grid layout
+const search = ref('')
 
-const toast = useToast()
-const { copy } = useClipboard()
+// Debounce search input
+const debouncedSearch = ref('')
+let searchTimeout: NodeJS.Timeout
 
-type Payment = {
-  id: string
-  date: string
-  status: 'paid' | 'failed' | 'refunded'
-  email: string
-  amount: number
+const debounceSearch = (value: string) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = value
+  }, 500)
 }
 
-const data = ref<Payment[]>([
-  {
-    id: '4600',
-    date: '2024-03-11T15:30:00',
-    status: 'paid',
-    email: 'james.anderson@example.com',
-    amount: 594
-  },
-  {
-    id: '4599',
-    date: '2024-03-11T10:10:00',
-    status: 'failed',
-    email: 'mia.white@example.com',
-    amount: 276
-  },
-  {
-    id: '4598',
-    date: '2024-03-11T08:50:00',
-    status: 'refunded',
-    email: 'william.brown@example.com',
-    amount: 315
-  },
-  {
-    id: '4597',
-    date: '2024-03-10T19:45:00',
-    status: 'paid',
-    email: 'emma.davis@example.com',
-    amount: 529
-  },
-  {
-    id: '4596',
-    date: '2024-03-10T15:55:00',
-    status: 'paid',
-    email: 'ethan.harris@example.com',
-    amount: 639
+watch(search, (newValue) => {
+  debounceSearch(newValue)
+})
+
+// Build query parameters
+const queryParams = computed(() => {
+  const params: Record<string, any> = {
+    page: page.value,
+    limit: limit.value
   }
-])
+  
+  if (debouncedSearch.value) params.search = debouncedSearch.value
+  
+  return params
+})
 
-const columns: TableColumn<Payment>[] = [
-  {
-    accessorKey: 'id',
-    header: '#',
-    cell: ({ row }) => `#${row.getValue('id')}`
+const { data: res, pending, error, refresh } = await useAsyncData(
+  'santris',
+  () => {
+    const params = new URLSearchParams()
+    Object.entries(queryParams.value).forEach(([key, value]) => {
+      if (value) params.append(key, value.toString())
+    })
+    return $fetch(`/api/santris/?${params.toString()}`)
   },
   {
-    accessorKey: 'date',
-    header: 'Date',
-    cell: ({ row }) => {
-      return new Date(row.getValue('date')).toLocaleString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-    }
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const color = {
-        paid: 'success' as const,
-        failed: 'error' as const,
-        refunded: 'neutral' as const
-      }[row.getValue('status') as string]
-
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.getValue('status')
-      )
-    }
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email'
-  },
-  {
-    accessorKey: 'amount',
-    header: () => h('div', { class: 'text-right' }, 'Amount'),
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'))
-
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR'
-      }).format(amount)
-
-      return h('div', { class: 'text-right font-medium' }, formatted)
-    }
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => {
-      return h(
-        'div',
-        { class: 'text-right' },
-        h(
-          UDropdownMenu,
-          {
-            content: {
-              align: 'end'
-            },
-            items: getRowItems(row),
-            'aria-label': 'Actions dropdown'
-          },
-          () =>
-            h(UButton, {
-              icon: 'i-lucide-ellipsis-vertical',
-              color: 'neutral',
-              variant: 'ghost',
-              class: 'ml-auto',
-              'aria-label': 'Actions dropdown'
-            })
-        )
-      )
-    }
+    watch: [queryParams]
   }
-]
+)
 
-function getRowItems(row: Row<Payment>) {
-  return [
-    {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy payment ID',
-      onSelect() {
-        copy(row.original.id)
+const santris = computed(() => res.value?.data ?? [])
+const total = computed(() => res.value?.pagination?.total ?? 0)
 
-        toast.add({
-          title: 'Payment ID copied to clipboard!',
-          color: 'success',
-          icon: 'i-lucide-circle-check'
-        })
-      }
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'View customer'
-    },
-    {
-      label: 'View payment details'
-    }
-  ]
+// Reset page when search changes
+watch([debouncedSearch], () => {
+  page.value = 1
+})
+
+// Clear all filters
+const clearFilters = () => {
+  search.value = ''
+  debouncedSearch.value = ''
+  page.value = 1
 }
 </script>
 
 <template>
-  <UTable :data="data" :columns="columns" class="flex-1" />
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
+          <UIcon name="i-heroicons-academic-cap" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Data Santri <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+          Jelajahi data lengkap santri di pesantren kami. Temukan informasi detail tentang setiap santri, termasuk profil, status, dan alamat mereka.
+        </p>
+        
+        <!-- Navigation Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <UButton size="lg" to="/santri" class="text-white">
+            <UIcon name="i-heroicons-home" class="mr-2" />
+            Beranda Santri
+          </UButton>
+          <UButton size="lg" variant="outline" to="/blogs">
+            <UIcon name="i-heroicons-document-text" class="mr-2" />
+            Lihat Blog Santri
+          </UButton>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Results Info -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
+            {{ search ? 'Hasil Pencarian' : 'Daftar Santri' }}
+          </h2>
+          <p class="text-gray-600 dark:text-gray-300 mt-1">
+            <template v-if="pending">
+              Sedang memuat...
+            </template>
+            <template v-else>
+              {{ total }} santri ditemukan
+            </template>
+          </p>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-4">
+          <div class="flex-1">
+            <UInput
+              v-model="search"
+              placeholder="Cari santri berdasarkan nama..."
+              size="lg"
+              :loading="pending"
+              :trailing-icon="search ? 'i-heroicons-x-mark' : 'i-heroicons-magnifying-glass'"
+              @click:trailing="search ? search = '' : null"
+              class="w-full min-w-80"
+            >
+              <template #leading>
+                <UIcon name="i-heroicons-magnifying-glass" class="h-5 w-5 text-gray-400" />
+              </template>
+            </UInput>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Search -->
+      <div class="md:hidden mt-4">
+        <UInput
+          v-model="search"
+          placeholder="Cari santri berdasarkan nama..."
+          size="lg"
+          :loading="pending"
+          :trailing-icon="search ? 'i-heroicons-x-mark' : 'i-heroicons-magnifying-glass'"
+          @click:trailing="search ? search = '' : null"
+          class="w-full"
+        >
+          <template #leading>
+            <UIcon name="i-heroicons-magnifying-glass" class="h-5 w-5 text-gray-400" />
+          </template>
+        </UInput>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="pending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="i in 8" :key="i" class="animate-pulse">
+        <div class="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"></div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="text-center py-12">
+      <UIcon name="i-heroicons-exclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        Terjadi Kesalahan
+      </h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        Gagal memuat data santri. Silakan coba lagi.
+      </p>
+      <UButton @click="refresh" variant="outline">
+        <UIcon name="i-heroicons-arrow-path" class="mr-2" />
+        Coba Lagi
+      </UButton>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="santris.length === 0" class="text-center py-12">
+      <UIcon name="i-heroicons-users" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        {{ search ? 'Santri Tidak Ditemukan' : 'Belum Ada Data Santri' }}
+      </h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        {{ search 
+          ? `Tidak ditemukan santri yang sesuai dengan "${search}"` 
+          : 'Belum ada data santri yang tersedia.'
+        }}
+      </p>
+      <UButton v-if="search" @click="clearFilters" variant="outline">
+        <UIcon name="i-heroicons-arrow-path" class="mr-2" />
+        Reset Pencarian
+      </UButton>
+    </div>
+
+    <!-- Santri Cards -->
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <SantriCard
+        v-for="(item, idx) in santris"
+        :key="item.id || idx"
+        :student="item" 
+        :show-stats="true"
+      />
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="santris.length > 0" class="mt-12 flex justify-center">
+      <UPagination
+        v-model="page"
+        :total="total"
+        :page-count="limit"
+        show-first
+        show-last
+        :max="7"
+      />
+    </div>
+  </section>
 </template>

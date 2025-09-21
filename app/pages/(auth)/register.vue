@@ -10,70 +10,101 @@ definePageMeta({
 useHead({
   title: 'Register - Sisantri',
   meta: [
-    {
-      name: 'description',
-      content: 'Register a new account on Sisantri'
-    }
+    { name: 'description', content: 'Register a new account on Sisantri' }
   ]
 })
 
 const toast = useToast()
+const { register } = useAuth()
 
-const fields = [{
-  name: 'name',
-  type: 'text' as const,
-  label: 'Full Name',
-  placeholder: 'Enter your full name',
-  required: true
-}, {
-  name: 'phone',
-  type: 'text' as const,
-  label: 'Phone Number',
-  placeholder: 'Enter your phone number',
-  required: true
-}, {
-  name: 'email',
-  type: 'text' as const,
-  label: 'Email',
-  placeholder: 'Enter your email',
-  required: true
-}, {
-  name: 'password',
-  label: 'Password',
-  type: 'password' as const,
-  placeholder: 'Enter your password'
-}, {
-  name: 'confirmPassword',
-  label: 'Confirm Password',
-  type: 'password' as const,
-  placeholder: 'Confirm your password'
-}]
+const fields = [
+  {
+    name: 'name',
+    type: 'text' as const,
+    label: 'Full Name',
+    placeholder: 'Enter your full name',
+    required: true
+  },
+  {
+    name: 'phone',
+    type: 'text' as const,
+    label: 'Phone Number',
+    placeholder: 'Enter your phone number',
+    required: true
+  },
+  {
+    name: 'email',
+    type: 'text' as const,
+    label: 'Email',
+    placeholder: 'Enter your email',
+    required: true
+  },
+  {
+    name: 'password',
+    label: 'Password',
+    type: 'password' as const,
+    placeholder: 'Enter your password'
+  },
+  {
+    name: 'confirmPassword',
+    label: 'Confirm Password',
+    type: 'password' as const,
+    placeholder: 'Confirm your password'
+  }
+]
 
 const schema = z.object({
+  name: z.string().min(3, 'Name is required'),
+  phone: z.string().min(10, 'Phone number is too short'),
   email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Must be at least 8 characters')
+  password: z.string().min(8, 'Must be at least 8 characters'),
+  confirmPassword: z.string().min(8, 'Must be at least 8 characters')
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword']
 })
 
 type Schema = z.output<typeof schema>
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
-  console.log('Submitted', payload)
+async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  try {
+    await register(
+      payload.data.email,
+      payload.data.password,
+      payload.data.name,
+      payload.data.phone
+    )
+
+    toast.add({
+      title: 'Registration successful',
+      description: 'Please check your email to confirm your account.',
+      color: 'green'
+    })
+
+    navigateTo('/login')
+  } catch (err: any) {
+    toast.add({
+      title: 'Registration failed',
+      description: err.message,
+      color: 'red'
+    })
+  }
 }
 </script>
 
 <template>
   <div class="px-4 flex flex-col items-center justify-center">
-      <UAuthForm
-        :schema="schema"
-        :fields="fields"
-        title="Register your account"
-        icon="i-lucide-user"
-        @submit="onSubmit"
-      >
-        <template #description>
-          Sudah memiliki akun? <ULink to="/login" class="text-primary font-medium">Sign In</ULink>.
-        </template>
-      </UAuthForm>
+    <UAuthForm
+      :schema="schema"
+      :fields="fields"
+      title="Register your account"
+      icon="i-lucide-user"
+      @submit="onSubmit"
+    >
+      <template #description>
+        Sudah memiliki akun?
+        <ULink to="/login" class="text-primary font-medium">Sign In</ULink>.
+      </template>
+    </UAuthForm>
   </div>
 </template>
-

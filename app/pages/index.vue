@@ -59,24 +59,8 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 bg-primary-50 dark:bg-primary-950 rounded-3xl">
-      <div class="max-w-4xl mx-auto text-center">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12">
-          Dalam Angka
-        </h2>
-        
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          <div v-for="stat in stats" :key="stat.label">
-            <div class="text-4xl font-bold text-primary-600 mb-2">
-              {{ stat.value }}
-            </div>
-            <div class="text-gray-600 dark:text-gray-400">
-              {{ stat.label }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <SantriPreview />
+    <BlogPreview />
 
     <!-- CTA Section -->
     <section class="py-16 text-center">
