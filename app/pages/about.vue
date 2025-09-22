@@ -11,7 +11,7 @@ interface Feature {
     <!-- Hero Section -->
     <section class="text-center py-16">
       <div class="max-w-4xl mx-auto">
-        <UIcon name="i-heroicons-academic-cap" class="h-16 w-16 text-primary-600 mx-auto mb-6" />
+        <UIcon name="i-lucide-users" class="h-16 w-16 text-primary-600 mx-auto mb-6" />
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
           Tentang Sisantri
         </h1>
@@ -46,22 +46,22 @@ interface Feature {
             <div class="bg-primary-50 dark:bg-primary-950 rounded-3xl p-8">
               <div class="grid grid-cols-2 gap-6">
                 <div class="text-center">
-                  <UIcon name="i-heroicons-users" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
+                  <UIcon name="i-lucide-users" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
                   <h4 class="font-semibold text-gray-900 dark:text-white">Data Santri</h4>
                   <p class="text-sm text-gray-600 dark:text-gray-400">Kelola profil santri</p>
                 </div>
                 <div class="text-center">
-                  <UIcon name="i-heroicons-newspaper" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
+                  <UIcon name="i-lucide-newspaper" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
                   <h4 class="font-semibold text-gray-900 dark:text-white">Berita</h4>
                   <p class="text-sm text-gray-600 dark:text-gray-400">Publikasi informasi</p>
                 </div>
                 <div class="text-center">
-                  <UIcon name="i-heroicons-magnifying-glass" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
+                  <UIcon name="i-lucide-user-search" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
                   <h4 class="font-semibold text-gray-900 dark:text-white">Pencarian</h4>
                   <p class="text-sm text-gray-600 dark:text-gray-400">Cari dengan mudah</p>
                 </div>
                 <div class="text-center">
-                  <UIcon name="i-heroicons-device-phone-mobile" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
+                  <UIcon name="i-lucide-smartphone" class="h-12 w-12 text-primary-600 mx-auto mb-3" />
                   <h4 class="font-semibold text-gray-900 dark:text-white">Responsif</h4>
                   <p class="text-sm text-gray-600 dark:text-gray-400">Multi-device</p>
                 </div>
@@ -117,11 +117,11 @@ interface Feature {
         </p>
         <div class="space-x-4">
           <UButton to="/santri" color="primary" size="lg">
-            <UIcon name="i-heroicons-users" class="mr-2" />
+            <UIcon name="i-lucide-users" class="mr-2" />
             Cari Data Santri
           </UButton>
           <UButton to="/blogs" variant="outline" color="primary" size="lg">
-            <UIcon name="i-heroicons-newspaper" class="mr-2" />
+            <UIcon name="i-lucide-newspaper" class="mr-2" />
             Baca Berita
             </UButton>
         </div>

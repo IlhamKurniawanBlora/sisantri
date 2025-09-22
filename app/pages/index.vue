@@ -1,34 +1,42 @@
 <template>
   <div class="space-y-16">
     <!-- Hero Section -->
-    <section class="text-center py-20">
-      <div class="max-w-4xl mx-auto">
-        <UIcon name="i-heroicons-academic-cap" class="h-20 w-20 text-primary-600 mx-auto mb-8" />
-        <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-          Selamat Datang di <span class="text-primary-600">Sisantri</span>
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Sistem informasi digital untuk pengelolaan data santri dan penyebaran berita pondok pesantren
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <UButton size="lg" to="/santri" class="text-white">
-            <UIcon name="i-heroicons-users" class="mr-2" />
-            Lihat Data Santri
-          </UButton>
-          <UButton size="lg" variant="outline" to="/blogs">
-            <UIcon name="i-heroicons-newspaper" class="mr-2" />
-            Baca Berita
-          </UButton>
+     <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
+            <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Selamat datang di <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
+          </h1>
+          <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+            Sistem informasi digital untuk pengelolaan data santri dan penyebaran berita pondok pesantren
+          </p>
+          
+          <!-- Navigation Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <UButton size="lg" to="/santri" class="text-white">
+              <UIcon name="i-lucide-users" class="mr-2" />
+              Data Santri
+            </UButton>
+            <UButton size="lg" variant="outline" to="/santri">
+              <UIcon name="i-lucide-newspaper" class="mr-2" />
+              Artikel Santri
+            </UButton>
+          </div>
         </div>
+
       </div>
     </section>
+
 
     <!-- Features Section -->
     <section class="py-16">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Fitur Utama
+            Fitur Utama <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Aplikasi yang dirancang khusus untuk memudahkan pengelolaan pondok pesantren
@@ -59,8 +67,8 @@
     </section>
 
     <!-- Stats Section -->
-    <SantriPreview />
-    <BlogPreview />
+    <SantriPreview class="py-16" />
+    <BlogPreview class="py-16" />
 
     <!-- CTA Section -->
     <section class="py-16 text-center">
@@ -99,32 +107,32 @@ useHead({
 const features = [
   {
     title: 'Data Santri',
-    icon: 'i-heroicons-users',
+    icon: 'i-lucide-users',
     description: 'Kelola dan tampilkan data santri dengan profil lengkap, foto, dan informasi detail'
   },
   {
     title: 'Berita & Informasi',
-    icon: 'i-heroicons-newspaper',
+    icon: 'i-lucide-newspaper',
     description: 'Publikasikan berita dan informasi terbaru untuk santri dan masyarakat'
   },
   {
     title: 'Pencarian Mudah',
-    icon: 'i-heroicons-magnifying-glass',
+    icon: 'i-lucide-user-search',
     description: 'Cari santri berdasarkan nama dengan fitur pencarian yang cepat dan akurat'
   },
   {
     title: 'Responsif',
-    icon: 'i-heroicons-device-phone-mobile',
+    icon: 'i-lucide-smartphone',
     description: 'Akses dari berbagai perangkat dengan tampilan yang optimal'
   },
   {
     title: 'Keamanan Data',
-    icon: 'i-heroicons-shield-check',
+    icon: 'i-lucide-shield-check',
     description: 'Data santri dan informasi tersimpan dengan aman dan terlindungi'
   },
   {
     title: 'Mudah Digunakan',
-    icon: 'i-heroicons-cursor-arrow-rays',
+    icon: 'i-lucide-user-check',
     description: 'Interface yang intuitif dan mudah digunakan untuk semua kalangan'
   }
 ]

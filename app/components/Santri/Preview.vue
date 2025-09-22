@@ -15,11 +15,11 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
 
 <template>
   <!-- Santri Preview Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center mb-12">
         <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-          <UIcon name="i-heroicons-users" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
+          <UIcon name="i-lucide-users" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
         </div>
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
           Santri <span class="text-primary-600 dark:text-primary-400">Terbaru</span>
@@ -38,7 +38,7 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-12">
-        <UIcon name="i-heroicons-exclamation-triangle" class="h-8 w-8 text-red-500 mx-auto mb-4" />
+        <UIcon name="i-lucide-usersexclamation-triangle" class="h-8 w-8 text-red-500 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
           Gagal Memuat Data
         </h3>
@@ -46,14 +46,14 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
           Terjadi kesalahan saat memuat data santri
         </p>
         <UButton @click="refresh" variant="outline" size="sm">
-          <UIcon name="i-heroicons-arrow-path" class="mr-2" />
+          <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
           Coba Lagi
         </UButton>
       </div>
 
       <!-- Empty State -->
       <div v-else-if="santris.length === 0" class="text-center py-12">
-        <UIcon name="i-heroicons-users" class="h-8 w-8 text-gray-400 mx-auto mb-4" />
+        <UIcon name="i-lucide-users" class="h-8 w-8 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
           Belum Ada Data Santri
         </h3>

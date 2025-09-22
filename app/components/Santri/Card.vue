@@ -35,7 +35,7 @@ const statusText = computed(() =>
 
 // Gender display
 const genderIcon = computed(() => 
-  props.student.gender === 'male' ? 'i-heroicons-user' : 'i-heroicons-user'
+  props.student.gender === 'male' ? 'i-lucide-mars' : 'i-lucide-venus'
 )
 
 const genderText = computed(() => 
@@ -89,7 +89,7 @@ const genderText = computed(() =>
     <!-- Address -->
     <div class="mt-4">
       <div class="flex items-start space-x-2">
-        <UIcon name="i-heroicons-map-pin" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+        <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
         <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
           {{ student.address }}
         </p>
@@ -102,7 +102,7 @@ const genderText = computed(() =>
         <!-- Joined Date -->
         <div class="text-center">
           <div class="flex items-center justify-center mb-1">
-            <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-blue-500" />
+            <UIcon name="i-lucide-calendar-days" class="w-4 h-4 text-green-500" />
           </div>
           <div class="text-xs font-medium text-gray-900 dark:text-white">
             {{ formattedDate }}
@@ -113,7 +113,7 @@ const genderText = computed(() =>
         <!-- Gender -->
         <div class="text-center">
           <div class="flex items-center justify-center mb-1">
-            <UIcon :name="genderIcon" class="w-4 h-4 text-purple-500" />
+            <UIcon :name="genderIcon" class="w-4 h-4 text-green-500" />
           </div>
           <div class="text-xs font-medium text-gray-900 dark:text-white">
             {{ genderText }}
@@ -125,7 +125,7 @@ const genderText = computed(() =>
         <div class="text-center">
           <div class="flex items-center justify-center mb-1">
             <UIcon 
-              :name="statusText === 'Active' ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'" 
+              :name="statusText === 'Active' ? 'i-lucide-check-circle' : 'i-lucide-x-circle'" 
               :class="statusColor === 'green' ? 'text-green-500' : 'text-red-500'"
               class="w-4 h-4" 
             />

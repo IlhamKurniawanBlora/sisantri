@@ -74,7 +74,7 @@ const clearFilters = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
-          <UIcon name="i-heroicons-academic-cap" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
+          <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Blog <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
@@ -86,11 +86,11 @@ const clearFilters = () => {
         <!-- Navigation Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <UButton size="lg" to="/santri" class="text-white">
-            <UIcon name="i-heroicons-home" class="mr-2" />
+            <UIcon name="i-lucide-usershome" class="mr-2" />
             Beranda Santri
           </UButton>
-          <UButton size="lg" variant="outline" to="/santri/data">
-            <UIcon name="i-heroicons-users" class="mr-2" />
+          <UButton size="lg" variant="outline" to="/santri">
+            <UIcon name="i-lucide-users" class="mr-2" />
             Lihat Data Santri
           </UButton>
         </div>
@@ -125,12 +125,12 @@ const clearFilters = () => {
               placeholder="Cari artikel, judul, atau konten..."
               size="lg"
               :loading="pending"
-              :trailing-icon="search ? 'i-heroicons-x-mark' : 'i-heroicons-magnifying-glass'"
+              :trailing-icon="search ? 'i-lucide-usersx-mark' : 'i-lucide-usersmagnifying-glass'"
               @click:trailing="search ? search = '' : null"
               class="w-full"
             >
               <template #leading>
-                <UIcon name="i-heroicons-magnifying-glass" class="h-5 w-5 text-gray-400" />
+                <UIcon name="i-lucide-usersmagnifying-glass" class="h-5 w-5 text-gray-400" />
               </template>
             </UInput>
           </div>
@@ -161,7 +161,7 @@ const clearFilters = () => {
 
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
+      <UIcon name="i-lucide-usersexclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
         Terjadi Kesalahan
       </h3>
@@ -169,14 +169,14 @@ const clearFilters = () => {
         Gagal memuat artikel. Silakan coba lagi.
       </p>
       <UButton @click="refresh" variant="outline">
-        <UIcon name="i-heroicons-arrow-path" class="mr-2" />
+        <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
         Coba Lagi
       </UButton>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="blogs.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-document-magnifying-glass" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <UIcon name="i-lucide-usersdocument-magnifying-glass" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
         {{ search ? 'Artikel Tidak Ditemukan' : 'Belum Ada Artikel' }}
       </h3>
@@ -187,7 +187,7 @@ const clearFilters = () => {
         }}
       </p>
       <UButton v-if="search || category" @click="clearFilters" variant="outline">
-        <UIcon name="i-heroicons-arrow-path" class="mr-2" />
+        <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
         Reset Filter
       </UButton>
     </div>

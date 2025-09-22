@@ -5,7 +5,7 @@
         <!-- Brand -->
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
-            <UIcon name="i-heroicons-academic-cap" class="h-6 w-6 text-primary-600" />
+            <UIcon name="i-lucide-users" class="h-6 w-6 text-primary-600" />
             <span class="text-lg font-bold text-gray-900 dark:text-white">Sisantri</span>
           </div>
           <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -37,15 +37,15 @@
           </h3>
           <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <div class="flex items-center space-x-2">
-              <UIcon name="i-heroicons-map-pin" class="h-4 w-4" />
+              <UIcon name="i-lucide-map-pin" class="h-4 w-4" />
               <span>Jl. Pondok Pesantren No. 123, Yogyakarta</span>
             </div>
             <div class="flex items-center space-x-2">
-              <UIcon name="i-heroicons-phone" class="h-4 w-4" />
+              <UIcon name="i-lucide-phone" class="h-4 w-4" />
               <span>(0274) 123-456</span>
             </div>
             <div class="flex items-center space-x-2">
-              <UIcon name="i-heroicons-envelope" class="h-4 w-4" />
+              <UIcon name="i-lucide-mail" class="h-4 w-4" />
               <span>info@sisantri.id</span>
             </div>
           </div>
