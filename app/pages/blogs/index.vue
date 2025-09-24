@@ -4,8 +4,7 @@ import { ref, computed, watchEffect, watch } from 'vue'
 const page = ref(1)
 const limit = ref(10)
 const search = ref('')
-const category = ref('')
-const selectedTags = ref('')
+const sortBy = ref('newest')
 
 // Debounce search input
 const debouncedSearch = ref('')
@@ -26,12 +25,11 @@ watch(search, (newValue) => {
 const queryParams = computed(() => {
   const params: Record<string, any> = {
     page: page.value,
-    limit: limit.value
+    limit: limit.value,
+    sortBy: sortBy.value
   }
   
   if (debouncedSearch.value) params.search = debouncedSearch.value
-  if (category.value) params.category = category.value
-  if (selectedTags.value) params.tags = selectedTags.value
   
   return params
 })
@@ -53,17 +51,23 @@ const { data: res, pending, error, refresh } = await useAsyncData(
 const blogs = computed(() => res.value?.data ?? [])
 const total = computed(() => res.value?.pagination?.total ?? 0)
 
-// Reset page when filters change
-watch([debouncedSearch, category, selectedTags], () => {
+// Reset page when search changes
+watch([debouncedSearch], () => {
   page.value = 1
 })
 
-// Clear all filters
-const clearFilters = () => {
+// Sort options
+const sortOptions = [
+  { label: 'Terbaru', value: 'newest' },
+  { label: 'Terlama', value: 'oldest' },
+  { label: 'A-Z', value: 'title_asc' },
+  { label: 'Z-A', value: 'title_desc' }
+]
+
+// Clear search
+const clearSearch = () => {
   search.value = ''
   debouncedSearch.value = ''
-  category.value = ''
-  selectedTags.value = ''
   page.value = 1
 }
 </script>
@@ -77,7 +81,7 @@ const clearFilters = () => {
           <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          Blog <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
+          Blog <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h1>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
           Temukan berbagai artikel, berita, dan cerita menarik seputar dunia pondok pesantren dan kehidupan santri
@@ -86,7 +90,7 @@ const clearFilters = () => {
         <!-- Navigation Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <UButton size="lg" to="/santri" class="text-white">
-            <UIcon name="i-lucide-usershome" class="mr-2" />
+            <UIcon name="i-lucide-home" class="mr-2" />
             Beranda Santri
           </UButton>
           <UButton size="lg" variant="outline" to="/santri">
@@ -118,36 +122,38 @@ const clearFilters = () => {
           </p>
         </div>
         
-        <div class="hidden md:flex items-center gap-4">
-          <div class="flex-1">
+        <!-- Search and Sort Controls -->
+        <div class="flex items-center gap-4">
+          <div class="flex-1 max-w-md">
             <UInput
               v-model="search"
               placeholder="Cari artikel, judul, atau konten..."
               size="lg"
               :loading="pending"
-              :trailing-icon="search ? 'i-lucide-usersx-mark' : 'i-lucide-usersmagnifying-glass'"
-              @click:trailing="search ? search = '' : null"
+              :trailing-icon="search ? 'i-lucide-x' : 'i-lucide-search'"
+              @click:trailing="search ? clearSearch() : null"
               class="w-full"
             >
               <template #leading>
-                <UIcon name="i-lucide-usersmagnifying-glass" class="h-5 w-5 text-gray-400" />
+                <UIcon name="i-lucide-newspaper" class="h-5 w-5 text-gray-400" />
               </template>
             </UInput>
           </div>
 
           <USelect
-            :items="[
-              { label: 'Terbaru', value: 'newest' },
-              { label: 'Terlama', value: 'oldest' },
-              { label: 'A-Z', value: 'title_asc' },
-              { label: 'Z-A', value: 'title_desc' }
-            ]"
+            v-model="sortBy"
+            :items="sortOptions"
             option-attribute="label"
             value-attribute="value"
             placeholder="Urutkan"
             size="sm"
-            class="w-40"
-          />
+            class="w-44"
+          >
+            <!-- Icon di kiri -->
+            <template #leading>
+              <UIcon name="i-lucide-arrow-up-down" class="w-4 h-4 text-gray-500" />
+            </template>
+          </USelect>
         </div>
       </div>
     </div>
@@ -161,7 +167,7 @@ const clearFilters = () => {
 
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-12">
-      <UIcon name="i-lucide-usersexclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
+      <UIcon name="i-lucide-exclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
         Terjadi Kesalahan
       </h3>
@@ -169,14 +175,14 @@ const clearFilters = () => {
         Gagal memuat artikel. Silakan coba lagi.
       </p>
       <UButton @click="refresh" variant="outline">
-        <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
+        <UIcon name="i-lucide-refresh-cw" class="mr-2" />
         Coba Lagi
       </UButton>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="blogs.length === 0" class="text-center py-12">
-      <UIcon name="i-lucide-usersdocument-magnifying-glass" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <UIcon name="i-lucide-file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
         {{ search ? 'Artikel Tidak Ditemukan' : 'Belum Ada Artikel' }}
       </h3>
@@ -186,9 +192,9 @@ const clearFilters = () => {
           : 'Belum ada artikel yang dipublikasikan.'
         }}
       </p>
-      <UButton v-if="search || category" @click="clearFilters" variant="outline">
-        <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
-        Reset Filter
+      <UButton v-if="search" @click="clearSearch" variant="outline">
+        <UIcon name="i-lucide-refresh-cw" class="mr-2" />
+        Reset Pencarian
       </UButton>
     </div>
 

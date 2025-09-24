@@ -1,13 +1,13 @@
 
-# Sisantri
+# SiDawam
 
-Sisantri adalah aplikasi web yang dirancang khusus untuk pondok pesantren, memudahkan pengelolaan data santri dan penyebaran berita/informasi terkini. Aplikasi ini dapat diakses oleh dua tipe pengguna utama: **admin** (pengelola) dan **guest** (pengunjung).
+SiDawam adalah aplikasi web yang dirancang khusus untuk pondok pesantren, memudahkan pengelolaan data santri dan penyebaran berita/informasi terkini. Aplikasi ini dapat diakses oleh dua tipe pengguna utama: **admin** (pengelola) dan **guest** (pengunjung).
 
 ---
 
-## Apa itu Sisantri?
+## Apa itu SiDawam?
 
-Sisantri membantu pondok pesantren dalam menyimpan, menampilkan, dan mengelola data santri serta berita secara digital. Dengan tampilan yang ramah pengguna, aplikasi ini memudahkan pengunjung untuk mencari informasi santri dan membaca berita terbaru, serta memudahkan admin dalam mengelola data secara efisien.
+SiDawam membantu pondok pesantren dalam menyimpan, menampilkan, dan mengelola data santri serta berita secara digital. Dengan tampilan yang ramah pengguna, aplikasi ini memudahkan pengunjung untuk mencari informasi santri dan membaca berita terbaru, serta memudahkan admin dalam mengelola data secara efisien.
 
 ---
 
@@ -47,7 +47,7 @@ Pengunjung dapat membaca berita atau informasi terbaru yang dipublikasikan oleh 
 
 ---
 
-## Kenapa Menggunakan Sisantri?
+## Kenapa Menggunakan SiDawam?
 
 - Memudahkan pengelolaan data santri secara digital
 - Mempercepat penyebaran informasi kepada santri dan masyarakat

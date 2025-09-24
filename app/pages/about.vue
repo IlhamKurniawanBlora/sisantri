@@ -13,32 +13,32 @@ interface Feature {
       <div class="max-w-4xl mx-auto">
         <UIcon name="i-lucide-users" class="h-16 w-16 text-primary-600 mx-auto mb-6" />
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-          Tentang Sisantri
+          Tentang SiDawam
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-          Sisantri adalah aplikasi web yang dirancang khusus untuk pondok pesantren, 
+          SiDawam adalah aplikasi web yang dirancang khusus untuk pondok pesantren, 
           memudahkan pengelolaan data santri dan penyebaran berita/informasi terkini.
         </p>
       </div>
     </section>
 
-    <!-- What is Sisantri -->
+    <!-- What is SiDawam -->
     <section class="py-16">
       <div class="max-w-6xl mx-auto">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              Apa itu Sisantri?
+              Apa itu SiDawam?
             </h2>
             <div class="space-y-4 text-gray-600 dark:text-gray-300">
               <p>
-                Sisantri membantu pondok pesantren dalam menyimpan, menampilkan, dan mengelola data santri serta berita secara digital. Dengan tampilan yang ramah pengguna, aplikasi ini memudahkan pengunjung untuk mencari informasi santri dan membaca berita terbaru.
+                SiDawam membantu pondok pesantren dalam menyimpan, menampilkan, dan mengelola data santri serta berita secara digital. Dengan tampilan yang ramah pengguna, aplikasi ini memudahkan pengunjung untuk mencari informasi santri dan membaca berita terbaru.
               </p>
               <p>
                 Aplikasi ini dapat diakses oleh dua tipe pengguna utama: <strong>admin</strong> (pengelola) dan <strong>guest</strong> (pengunjung), dengan fitur yang disesuaikan untuk kebutuhan masing-masing.
               </p>
               <p>
-                Dengan teknologi modern dan antarmuka yang intuitif, Sisantri menjadi solusi terbaik untuk modernisasi sistem informasi pondok pesantren.
+                Dengan teknologi modern dan antarmuka yang intuitif, SiDawam menjadi solusi terbaik untuk modernisasi sistem informasi pondok pesantren.
               </p>
             </div>
           </div>

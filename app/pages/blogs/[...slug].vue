@@ -183,7 +183,7 @@ const formattedContent = computed(() => {
               >
                 <UIcon name="i-heroicons-user" v-if="!blog.profiles?.avatar_url" />
               </UAvatar>
-              <span class="font-medium">{{ blog.profiles?.full_name || 'admin sisantri' }}</span>
+              <span class="font-medium">{{ blog.profiles?.full_name || 'admin SiDawam' }}</span>
             </div>
 
             <!-- Date -->

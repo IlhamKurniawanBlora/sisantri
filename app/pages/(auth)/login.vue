@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth'
+
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+const { login, user, initSession } = useAuth()
 
 definePageMeta({
   layout: 'blank',
-  title: 'Login Sisantri'
+  title: 'Login SiDawam',
+  middleware: 'guest', // ⬅️ ganti auth -> guest (biar halaman login cuma bisa diakses kalo BELUM login)
 })
 
 useHead({
-  title: 'Login - Sisantri',
+  title: 'Login - SiDawam',
   meta: [
-    { name: 'description', content: 'Login to your account on Sisantri' }
+    { name: 'description', content: 'Login to your account on SiDawam' }
   ]
 })
 
 const toast = useToast()
-
-const { login } = useAuth()
+const supabase = useNuxtApp().$supabase
 
 const fields = [
   {
@@ -47,17 +48,30 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
+onMounted(() => {
+  initSession()
+})
+
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
   try {
     await login(payload.data.email, payload.data.password)
-
+    // Fetch user profile for role
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.value?.id)
+      .single()
+    if (error) throw new Error(error.message)
+    if (profile?.role === 'admin') {
+      navigateTo('/admin')
+    } else {
+      navigateTo('/')
+    }
     toast.add({
       title: 'Login successful',
       description: 'Welcome back!',
       color: 'success'
     })
-
-    navigateTo('/')
   } catch (err: any) {
     toast.add({
       title: 'Login failed',
@@ -67,6 +81,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   }
 }
 </script>
+
 
 <template>
   <div class="px-4 flex flex-col items-center justify-center">

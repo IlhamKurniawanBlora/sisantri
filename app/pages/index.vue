@@ -1,42 +1,11 @@
 <template>
   <div class="space-y-16">
-    <!-- Hero Section -->
-     <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
-            <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
-          </div>
-          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Selamat datang di <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
-          </h1>
-          <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            Sistem informasi digital untuk pengelolaan data santri dan penyebaran berita pondok pesantren
-          </p>
-          
-          <!-- Navigation Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-            <UButton size="lg" to="/santri" class="text-white">
-              <UIcon name="i-lucide-users" class="mr-2" />
-              Data Santri
-            </UButton>
-            <UButton size="lg" variant="outline" to="/santri">
-              <UIcon name="i-lucide-newspaper" class="mr-2" />
-              Artikel Santri
-            </UButton>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-
-    <!-- Features Section -->
+    <CarouselDisplay />
     <section class="py-16">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Fitur Utama <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
+            Fitur Utama <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Aplikasi yang dirancang khusus untuk memudahkan pengelolaan pondok pesantren
@@ -74,7 +43,7 @@
     <section class="py-16 text-center">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-          Mulai Jelajahi Sisantri
+          Mulai Jelajahi SiDawam
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
           Temukan informasi santri dan berita terbaru dari pondok pesantren
@@ -95,7 +64,7 @@
 <script setup lang="ts">
 // SEO
 useHead({
-  title: 'Beranda - Sisantri',
+  title: 'Beranda - SiDawam',
   meta: [
     {
       name: 'description',

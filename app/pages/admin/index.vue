@@ -1,156 +1,104 @@
-<script setup lang="ts">
-definePageMeta({
-  layout: 'admin',
-  title: 'Dashboard'
-})
-
-useHead({
-  title: 'Dashboard Admin'
-})
-
-const stats = [
-  {
-    label: 'Total Santri',
-    value: '1,247',
-    change: '+12% bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-users'
-  },
-  {
-    label: 'Santri Aktif',
-    value: '1,189',
-    change: '+5% bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-user-check'
-  },
-  {
-    label: 'Total Berita',
-    value: '89',
-    change: '+3 berita baru',
-    trend: 'up',
-    icon: 'i-heroicons-newspaper'
-  },
-  {
-    label: 'Alumni',
-    value: '58',
-    change: '+2 bulan ini',
-    trend: 'up',
-    icon: 'i-heroicons-academic-cap'
-  }
-]
-
-const recentActivities = [
-  {
-    id: 1,
-    title: 'Santri baru ditambahkan: Ahmad Fauzi',
-    time: '2 jam yang lalu',
-    icon: 'i-heroicons-user-plus',
-    color: 'text-green-600'
-  },
-  {
-    id: 2,
-    title: 'Berita baru dipublikasi: "Kegiatan Ramadan"',
-    time: '4 jam yang lalu',
-    icon: 'i-heroicons-newspaper',
-    color: 'text-blue-600'
-  },
-  {
-    id: 3,
-    title: 'Data santri diperbarui: Muhammad Rizki',
-    time: '1 hari yang lalu',
-    icon: 'i-heroicons-pencil-square',
-    color: 'text-yellow-600'
-  }
-]
-</script>
-
+<!-- pages/admin/index.vue -->
 <template>
   <div>
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
-      <p class="text-gray-600">Selamat datang di panel admin Sisantri</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+        Dashboard
+      </h1>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Welcome back, {{ userProfile?.name || 'Admin' }}!
+      </p>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <UCard v-for="stat in stats" :key="stat.label">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600 mb-1">{{ stat.label }}</p>
-            <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
-            <p :class="[
-              'text-xs flex items-center gap-1',
-              stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-            ]">
-              <UIcon 
-                :name="stat.trend === 'up' ? 'i-heroicons-arrow-trending-up' : 'i-heroicons-arrow-trending-down'" 
-                class="w-3 h-3"
-              />
-              {{ stat.change }}
-            </p>
+      <UCard>
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <UIcon name="i-heroicons-users" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
-          <div class="p-3 rounded-full bg-primary-50">
-            <UIcon :name="stat.icon" class="w-6 h-6 text-primary-600" />
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Santris</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalSantris }}</p>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+            <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Blogs</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalBlogs }}</p>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+            <UIcon name="i-heroicons-eye" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Views</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalViews }}</p>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+            <UIcon name="i-heroicons-star" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.activeUsers }}</p>
           </div>
         </div>
       </UCard>
     </div>
 
-    <!-- Quick Actions & Recent Activity -->
+    <!-- Recent Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Quick Actions -->
       <UCard>
         <template #header>
-          <h2 class="text-lg font-semibold">Aksi Cepat</h2>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Santris</h3>
         </template>
         
-        <div class="space-y-4">
-          <UButton
-            to="/admin/santri/create"
-            color="primary"
-            block
-            size="lg"
-            icon="i-heroicons-user-plus"
-          >
-            Tambah Santri Baru
-          </UButton>
-          
-          <UButton
-            to="/admin/berita/create"
-            color="success"
-            block
-            size="lg"
-            icon="i-heroicons-pencil-square"
-          >
-            Tulis Berita
-          </UButton>
-          
-          <UButton
-            to="/admin/santri"
-            variant="outline"
-            block
-            size="lg"
-            icon="i-heroicons-users"
-          >
-            Kelola Data Santri
-          </UButton>
+        <div class="space-y-3">
+          <div v-for="santri in recentSantris" :key="santri.id" class="flex items-center justify-between">
+            <div class="flex items-center">
+              <UAvatar
+                :src="santri.avatar_url"
+                :alt="santri.name"
+                size="sm"
+                class="mr-3"
+              />
+              <div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ santri.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ santri.email }}</p>
+              </div>
+            </div>
+            <UBadge color="green" variant="soft">New</UBadge>
+          </div>
         </div>
       </UCard>
 
-      <!-- Recent Activity -->
       <UCard>
         <template #header>
-          <h2 class="text-lg font-semibold">Aktivitas Terbaru</h2>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Blogs</h3>
         </template>
         
-        <div class="space-y-4">
-          <div v-for="activity in recentActivities" :key="activity.id" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-            <UIcon :name="activity.icon" :class="['w-5 h-5', activity.color]" />
-            <div class="flex-1">
-              <p class="text-sm font-medium">{{ activity.title }}</p>
-              <p class="text-xs text-gray-600">{{ activity.time }}</p>
-            </div>
+        <div class="space-y-3">
+          <div v-for="blog in recentBlogs" :key="blog.id" class="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-b-0">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ blog.title }}</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              By {{ blog.author }} • {{ formatDate(blog.created_at) }}
+            </p>
           </div>
         </div>
       </UCard>
@@ -158,3 +106,129 @@ const recentActivities = [
   </div>
 </template>
 
+<script setup lang="ts">
+import { useAuth } from '@/composables/useAuth'
+definePageMeta({
+  layout: 'admin',
+})
+const { user } = useAuth()
+const supabase = useNuxtApp().$supabase
+
+// State
+const userProfile = ref(null)
+const stats = ref({
+  totalSantris: 0,
+  totalBlogs: 0,
+  totalViews: 0,
+  activeUsers: 0
+})
+const recentSantris = ref([])
+const recentBlogs = ref([])
+
+// Fetch user profile
+const fetchUserProfile = async () => {
+  if (!user.value) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.value.id)
+      .single()
+    
+    if (!error && data) {
+      userProfile.value = data
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error)
+  }
+}
+
+// Fetch dashboard stats
+const fetchStats = async () => {
+  try {
+    // Fetch total santris
+    const { count: santrisCount } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'santri')
+
+    // Fetch total blogs
+    const { count: blogsCount } = await supabase
+      .from('blogs')
+      .select('*', { count: 'exact', head: true })
+
+    stats.value = {
+      totalSantris: santrisCount || 0,
+      totalBlogs: blogsCount || 0,
+      totalViews: 1234, // Placeholder - implement view tracking
+      activeUsers: 89   // Placeholder - implement active user tracking
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error)
+  }
+}
+
+// Fetch recent santris
+const fetchRecentSantris = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, email, avatar_url, created_at')
+      .eq('role', 'santri')
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    if (!error && data) {
+      recentSantris.value = data
+    }
+  } catch (error) {
+    console.error('Error fetching recent santris:', error)
+  }
+}
+
+// Fetch recent blogs
+const fetchRecentBlogs = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('blogs')
+      .select(`
+        id, 
+        title, 
+        created_at,
+        profiles!blogs_author_id_fkey(name)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    if (!error && data) {
+      recentBlogs.value = data.map(blog => ({
+        ...blog,
+        author: blog.profiles?.name || 'Unknown'
+      }))
+    }
+  } catch (error) {
+    console.error('Error fetching recent blogs:', error)
+  }
+}
+
+// Format date helper
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('id-ID', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  })
+}
+
+// Initialize data
+onMounted(async () => {
+  await Promise.all([
+    fetchUserProfile(),
+    fetchStats(),
+    fetchRecentSantris(),
+    fetchRecentBlogs()
+  ])
+})
+</script>

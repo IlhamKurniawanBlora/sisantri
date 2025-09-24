@@ -6,7 +6,7 @@
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
             <UIcon name="i-lucide-users" class="h-6 w-6 text-primary-600" />
-            <span class="text-lg font-bold text-gray-900 dark:text-white">Sisantri</span>
+            <span class="text-lg font-bold text-gray-900 dark:text-white">SiDawam</span>
           </div>
           <p class="text-sm text-gray-600 dark:text-gray-400">
             Sistem informasi digital untuk pengelolaan data santri dan berita pondok pesantren.
@@ -38,15 +38,15 @@
           <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <div class="flex items-center space-x-2">
               <UIcon name="i-lucide-map-pin" class="h-4 w-4" />
-              <span>Jl. Pondok Pesantren No. 123, Yogyakarta</span>
+              <span>Malangan UH VII/512 A, RT 039 RW 013 Kel. Giwangan, Kec. Umbulharjo, Kota Yogyakarta. 55163</span>
             </div>
             <div class="flex items-center space-x-2">
               <UIcon name="i-lucide-phone" class="h-4 w-4" />
-              <span>(0274) 123-456</span>
+              <span>+62 813-3055-4348</span>
             </div>
             <div class="flex items-center space-x-2">
               <UIcon name="i-lucide-mail" class="h-4 w-4" />
-              <span>info@sisantri.id</span>
+              <span>info@SiDawam.id</span>
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@
       <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            © {{ new Date().getFullYear() }} Sisantri. All rights reserved.
+            © {{ new Date().getFullYear() }} SiDawam. All rights reserved.
           </p>
           <div class="flex items-center space-x-4 mt-4 md:mt-0">
             <span class="text-xs text-gray-500 dark:text-gray-500">Built with</span>

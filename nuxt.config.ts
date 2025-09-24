@@ -23,24 +23,24 @@ export default defineNuxtConfig({
 
   // SEO default config
   seo: {
-    siteName: 'Sisantri',
-    siteUrl: 'https://sisantri.com',
+    siteName: 'SiDawam',
+    siteUrl: 'https://SiDawam.com',
     description: 'Platform informasi santri modern dengan berita, blog, dan artikel Islami.',
-    keywords: ['santri', 'islam', 'blog', 'artikel', 'sisantri'],
+    keywords: ['santri', 'islam', 'blog', 'artikel', 'SiDawam'],
     twitterCard: 'summary_large_image',
-    twitterSite: '@sisantri',
-    twitterCreator: '@sisantri',
+    twitterSite: '@SiDawam',
+    twitterCreator: '@SiDawam',
     themeColor: '#16a34a',
     language: 'id'
   },
 
   app: {
     head: {
-      title: 'Sisantri',
+      title: 'SiDawam',
       meta: [
         { name: 'description', content: 'Platform informasi santri modern dengan berita, blog, dan artikel Islami.' },
-        { name: 'keywords', content: 'santri, islam, blog, artikel, sisantri' },
-        { name: 'author', content: 'Sisantri Team' },
+        { name: 'keywords', content: 'santri, islam, blog, artikel, SiDawam' },
+        { name: 'author', content: 'SiDawam Team' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' }

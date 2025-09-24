@@ -1,21 +1,23 @@
 <script setup lang="ts">
+
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+const { register, initSession } = useAuth()
 
 definePageMeta({
   layout: 'blank',
-  title: 'Registrasi Sisantri'
+  title: 'Registrasi SiDawam',
+  middleware: 'guest',
 })
 
 useHead({
-  title: 'Register - Sisantri',
+  title: 'Register - SiDawam',
   meta: [
-    { name: 'description', content: 'Register a new account on Sisantri' }
+    { name: 'description', content: 'Register a new account on SiDawam' }
   ]
 })
 
 const toast = useToast()
-const { register } = useAuth()
 
 const fields = [
   {
@@ -66,6 +68,10 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
+onMounted(() => {
+  initSession()
+})
+
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
   try {
     await register(
@@ -74,19 +80,17 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       payload.data.name,
       payload.data.phone
     )
-
     toast.add({
       title: 'Registration successful',
       description: 'Please check your email to confirm your account.',
-      color: 'green'
+      color: 'success'
     })
-
     navigateTo('/login')
   } catch (err: any) {
     toast.add({
       title: 'Registration failed',
       description: err.message,
-      color: 'red'
+      color: 'error'
     })
   }
 }

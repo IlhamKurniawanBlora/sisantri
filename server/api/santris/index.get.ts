@@ -4,7 +4,7 @@ interface SantriQuery {
   page?: number
   limit?: number
   search?: string
-  gender?: 'male' | 'female'
+  gender?: 'male' | 'female' | 'all'
   includeDeleted?: boolean
 }
 
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
       supabaseQuery = supabaseQuery.or(`full_name.ilike.%${search}%,nis.ilike.%${search}%,address.ilike.%${search}%`)
     }
 
-    if (gender) {
+    if (gender && gender !== 'all') {
       supabaseQuery = supabaseQuery.eq('gender', gender)
     }
 

@@ -71,7 +71,7 @@ const clearFilters = () => {
           <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          Data Santri <span class="text-primary-600 dark:text-primary-400">Sisantri</span>
+          Data Santri <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h1>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
           Jelajahi data lengkap santri di pesantren kami. Temukan informasi detail tentang setiap santri, termasuk profil, status, dan alamat mereka.
@@ -123,7 +123,7 @@ const clearFilters = () => {
               class="w-full min-w-80"
             >
               <template #leading>
-                <UIcon name="i-lucide-user-search" class="h-5 w-5 text-gray-400" />
+                <UIcon name="i-lucide-users" class="h-5 w-5 text-gray-400" />
               </template>
             </UInput>
           </div>
