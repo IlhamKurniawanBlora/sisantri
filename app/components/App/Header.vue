@@ -42,36 +42,52 @@ const handleLogout = async () => {
 
 <template>
   <UHeader>
-    <!-- Logo -->
+    <!-- Logo/Title -->
     <template #title>
       <AppLogo class="h-6 w-auto" />
     </template>
 
-    <!-- Navigation (desktop) -->
+    <!-- Desktop Navigation - akan otomatis hidden di mobile oleh default -->
     <UNavigationMenu :items="items" />
 
-    <!-- Right slot (user + logout + darkmode) -->
+    <!-- Right section -->
     <template #right>
-      <div class="flex items-center gap-3">
-        <!-- Jika user login, tampilkan email & tombol logout -->
-        <div v-if="user" class="flex items-center gap-2">
-          <span class="text-sm text-gray-600 dark:text-gray-300">
-            {{ user.email }}
-          </span>
+      <div class="flex items-center gap-2">
+        <!-- User section -->
+        <template v-if="user">
+          <!-- Desktop user info -->
+          <div class="hidden sm:flex items-center gap-2">
+            <span class="text-sm text-gray-600 dark:text-gray-300 max-w-32 truncate">
+              {{ user.email }}
+            </span>
+            <UButton
+              icon="i-lucide-log-out"
+              size="sm"
+              color="red"
+              variant="soft"
+              @click="handleLogout"
+            >
+              Logout
+            </UButton>
+          </div>
+
+          <!-- Mobile user - icon logout dengan ukuran lebih besar -->
           <UButton
+            class="sm:hidden"
             icon="i-lucide-log-out"
-            size="sm"
-            color="error"
+            size="md"
+            color="red"
             variant="soft"
             @click="handleLogout"
-          >
-            Logout
-          </UButton>
-        </div>
+            aria-label="Logout"
+          />
+        </template>
 
-        <!-- Jika belum login -->
-        <div v-else>
+        <!-- Login button -->
+        <template v-else>
+          <!-- Desktop login -->
           <UButton
+            class="hidden sm:flex"
             icon="i-lucide-log-in"
             size="sm"
             color="primary"
@@ -80,20 +96,77 @@ const handleLogout = async () => {
           >
             Login
           </UButton>
-        </div>
 
-        <!-- dark/light mode toggle -->
-        <UColorModeButton />
+          <!-- Mobile login - icon dengan ukuran lebih besar -->
+          <UButton
+            class="sm:hidden"
+            icon="i-lucide-log-in"
+            size="md"
+            color="primary"
+            variant="soft"
+            to="/login"
+            aria-label="Login"
+          />
+        </template>
+
+        <!-- Dark mode toggle dengan ukuran lebih besar di mobile -->
+        <UColorModeButton class="sm:size-sm size-md" />
       </div>
     </template>
 
-    <!-- Navigation (mobile) -->
+    <!-- Mobile Navigation Menu (dalam body slot) -->
     <template #body>
-      <UNavigationMenu
-        :items="items"
-        orientation="vertical"
-        class="-mx-2.5"
-      />
+      <!-- Navigation items untuk mobile dropdown dengan ukuran lebih besar -->
+      <div class="space-y-1 mb-6">
+        <UButton
+          v-for="item in items"
+          :key="item.to"
+          :to="item.to"
+          :icon="item.icon"
+          size="lg"
+          :color="item.active ? 'primary' : 'neutral'"
+          :variant="item.active ? 'solid' : 'ghost'"
+          class="w-full justify-start text-base font-medium py-3"
+          block
+        >
+          {{ item.label }}
+        </UButton>
+      </div>
+
+      <!-- User info untuk mobile dropdown -->
+      <div v-if="user" class="border-t border-gray-200 dark:border-gray-800 pt-6">
+        <div class="space-y-4">
+          <div class="text-sm text-gray-600 dark:text-gray-300 px-3">
+            {{ user.email }}
+          </div>
+          <UButton
+            icon="i-lucide-log-out"
+            size="lg"
+            color="red"
+            variant="soft"
+            @click="handleLogout"
+            class="w-full justify-start text-base py-3"
+            block
+          >
+            Logout
+          </UButton>
+        </div>
+      </div>
+
+      <!-- Login untuk mobile dropdown jika belum login -->
+      <div v-else class="border-t border-gray-200 dark:border-gray-800 pt-6">
+        <UButton
+          icon="i-lucide-log-in"
+          size="lg"
+          color="primary"
+          variant="soft"
+          to="/login"
+          class="w-full justify-center text-base py-3"
+          block
+        >
+          Login
+        </UButton>
+      </div>
     </template>
   </UHeader>
 </template>

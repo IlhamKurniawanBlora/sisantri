@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { ref, h, resolveComponent, computed, watch } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Row } from '@tanstack/vue-table'
-import BlogForm from '~/components/Admin/BlogForm.vue'
-import BlogFilters from '~/components/Admin/BlogFilters.vue'
-import BlogStats from '~/components/Admin/BlogStats.vue'
+import BlogFormContent from '~/components/Admin/Blog/Form.vue'
+import BlogDetailContent from '~/components/Admin/Blog/Detail.vue'
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UUser = resolveComponent('UUser')
+const UInput = resolveComponent('UInput')
+const USelect = resolveComponent('USelect')
+const UCheckbox = resolveComponent('UCheckbox')
+const UCard = resolveComponent('UCard')
+const UTable = resolveComponent('UTable')
+const UPagination = resolveComponent('UPagination')
+const UIcon = resolveComponent('UIcon')
+const USlideover = resolveComponent('USlideover')
+const UModal = resolveComponent('UModal')
 
 const toast = useToast()
 
@@ -32,19 +40,24 @@ type Blog = {
   }
 }
 
-// Reactive state
+// State management
+const data = ref<Blog[]>([])
+const loading = ref(false)
 const page = ref(1)
 const limit = ref(10)
 const search = ref('')
 const selectedCategory = ref('all')
 const sortBy = ref('newest')
-const showAddModal = ref(false)
-const showEditModal = ref(false)
-const showDetailModal = ref(false)
-const selectedBlog = ref<Blog | null>(null)
 const includeDeleted = ref(false)
+const total = ref(0)
 
-// Debounce search input
+// Modal states
+const showSlideover = ref(false)
+const mode = ref<'add' | 'edit'>('add')
+const selectedRow = ref<Blog | null>(null)
+const showDetailModal = ref(false)
+
+// Debounced search
 const debouncedSearch = ref('')
 let searchTimeout: NodeJS.Timeout
 
@@ -59,44 +72,46 @@ watch(search, (newValue) => {
   debounceSearch(newValue)
 })
 
-// Build query parameters
-const queryParams = computed(() => {
-  const params: Record<string, any> = {
-    page: page.value,
-    limit: limit.value,
-    sortBy: sortBy.value,
-    includeDeleted: includeDeleted.value
-  }
-  
-  if (debouncedSearch.value) params.search = debouncedSearch.value
-  if (selectedCategory.value && selectedCategory.value !== 'all') params.category = selectedCategory.value
-  
-  return params
+watch([debouncedSearch, selectedCategory, includeDeleted, sortBy], () => {
+  page.value = 1
+  fetchBlogs()
 })
 
-// Fetch blogs data
-const { data: res, pending, error, refresh } = await useAsyncData(
-  'admin-blogs',
-  () => {
-    const params = new URLSearchParams()
-    Object.entries(queryParams.value).forEach(([key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) {
-        params.append(key, value.toString())
-      }
+// Fetch data function
+async function fetchBlogs() {
+  loading.value = true
+  try {
+    const params = new URLSearchParams({
+      page: page.value.toString(),
+      limit: limit.value.toString(),
+      sortBy: sortBy.value,
+      includeDeleted: includeDeleted.value.toString()
     })
-    return $fetch(`/api/blogs?${params.toString()}`)
-  },
-  {
-    watch: [queryParams]
+    
+    if (debouncedSearch.value) params.append('search', debouncedSearch.value)
+    if (selectedCategory.value && selectedCategory.value !== 'all') {
+      params.append('category', selectedCategory.value)
+    }
+
+    const response = await $fetch(`/api/blogs?${params.toString()}`)
+    data.value = response.data || []
+    total.value = response.pagination?.total || 0
+  } catch (error) {
+    console.error('Error fetching blogs:', error)
+    toast.add({
+      title: 'Error',
+      description: 'Gagal memuat data blog',
+      color: 'error'
+    })
   }
-)
+  loading.value = false
+}
 
-const blogs = computed(() => res.value?.data ?? [])
-const total = computed(() => res.value?.pagination?.total ?? 0)
+onMounted(fetchBlogs)
 
-// Reset page when search/filters change
-watch([debouncedSearch, selectedCategory, includeDeleted], () => {
-  page.value = 1
+// Watch page changes
+watch(page, () => {
+  fetchBlogs()
 })
 
 // Filter options
@@ -118,7 +133,6 @@ const sortOptions = [
 
 // Table columns
 const columns: TableColumn<Blog>[] = [
-  // ...existing code...
   {
     accessorKey: 'title',
     header: 'Judul Blog',
@@ -206,237 +220,295 @@ const columns: TableColumn<Blog>[] = [
     header: 'Dibuat',
     cell: ({ row }) => {
       const date = row.getValue('created_at') as string
-      return h('span', {}, date
-        ? new Date(date).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          })
-        : '-')
+      return new Date(date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
     }
   },
   {
     id: 'actions',
+    header: 'Actions',
     cell: ({ row }) =>
-      h('div', { class: 'text-right' },
-        h(UDropdownMenu, {
-          items: getRowItems(row),
-          teleport: false,
-          onSelect: (item) => {
-            if (item && typeof item.onSelected === 'function') item.onSelected()
-            if (item && typeof item.click === 'function') item.click()
-          }
-        },
-        () =>
-          h(UButton, {
-            icon: 'i-lucide-more-vertical',
-            color: 'neutral',
-            variant: 'ghost',
-            size: 'sm'
-          })
+      h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            items: getRowItems(row),
+            'aria-label': 'Actions dropdown',
+            content: { align: 'end' }
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              'aria-label': 'Actions'
+            })
         )
       )
   }
 ]
+
 // Row actions
 function getRowItems(row: Row<Blog>) {
   const blog = row.original
+  
   const items = [
+    { type: 'label', label: 'Actions' },
     {
       label: 'Detail',
       icon: 'i-lucide-eye',
-      onSelected: () => viewBlog(blog)
+      onSelect() {
+        selectedRow.value = blog
+        showDetailModal.value = true
+      }
     },
     {
       label: 'Lihat di Web',
       icon: 'i-lucide-external-link',
-      onSelected: () => navigateTo(`/blogs/${blog.slug}`, { external: true })
+      onSelect() {
+        navigateTo(`/blogs/${blog.slug}`, { external: true })
+      }
     },
+    { type: 'separator' },
     {
       label: 'Edit',
-      icon: 'i-lucide-edit',
-      onSelected: () => editBlog(blog)
+      icon: 'i-lucide-pencil',
+      onSelect() {
+        mode.value = 'edit'
+        selectedRow.value = blog
+        showSlideover.value = true
+      }
     }
   ]
+
   if (!blog.deleted_at) {
     items.push({
-      label: 'Hapus',
-      icon: 'i-lucide-trash-2',
-      onSelected: () => deleteBlog(blog.slug)
+      label: 'Delete',
+      icon: 'i-lucide-trash',
+      onSelect: () => deleteBlog(blog.slug)
     })
   } else {
     items.push({
-      label: 'Pulihkan',
+      label: 'Restore',
       icon: 'i-lucide-undo-2',
-      onSelected: () => restoreBlog(blog.slug)
+      onSelect: () => restoreBlog(blog.slug)
     })
   }
+
   return items
 }
 
-
-// Actions
-const addBlog = () => {
-  selectedBlog.value = null
-  showAddModal.value = true
-}
-
-const viewBlog = (blog: Blog) => {
-  selectedBlog.value = blog
-  showDetailModal.value = true
-}
-
-const editBlog = (blog: Blog) => {
-  selectedBlog.value = blog
-  showEditModal.value = true
-}
-
-const deleteBlog = async (slug: string) => {
+// CRUD operations
+async function deleteBlog(slug: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus blog ini?')) return
   try {
     await $fetch(`/api/blogs/${slug}`, { method: 'DELETE' })
-    toast.add({
-      title: 'Blog berhasil dihapus!',
-      color: 'success'
-    })
-    refresh()
+    toast.add({ title: 'Blog deleted!', color: 'success', icon: 'i-lucide-trash' })
+    fetchBlogs()
   } catch (error) {
-    toast.add({
-      title: 'Gagal menghapus blog',
-      color: 'error'
-    })
+    toast.add({ title: 'Failed to delete blog', color: 'error' })
   }
 }
 
-const restoreBlog = async (slug: string) => {
+async function restoreBlog(slug: string) {
   if (!confirm('Apakah Anda yakin ingin memulihkan blog ini?')) return
   try {
     await $fetch(`/api/blogs/${slug}/restore`, { method: 'POST' })
-    toast.add({
-      title: 'Blog berhasil dipulihkan!',
-      color: 'success'
-    })
-    refresh()
+    toast.add({ title: 'Blog restored!', color: 'success', icon: 'i-lucide-undo-2' })
+    fetchBlogs()
   } catch (error) {
-    toast.add({
-      title: 'Gagal memulihkan blog',
-      color: 'error'
-    })
+    toast.add({ title: 'Failed to restore blog', color: 'error' })
   }
 }
 
-const handleBlogSaved = () => {
-  showAddModal.value = false
-  showEditModal.value = false
-  selectedBlog.value = null
-  refresh()
-  toast.add({
-    title: selectedBlog.value ? 'Blog berhasil diperbarui!' : 'Blog berhasil ditambahkan!',
-    color: 'success'
-  })
-}
+// Stats computed
+const stats = computed(() => {
+  const categories = [...new Set(data.value.filter(b => !b.deleted_at).map(b => b.category))]
+  const published = data.value.filter(b => !b.deleted_at).length
+  return {
+    total: total.value,
+    published: published,
+    categories: categories.length,
+    totalViews: 0 // implementasi jika ada views
+  }
+})
 
 // Clear filters
 const clearFilters = () => {
   search.value = ''
   debouncedSearch.value = ''
   selectedCategory.value = 'all'
+  sortBy.value = 'newest'
   page.value = 1
 }
 
-// Stats
-const stats = computed(() => {
-  const categories = [...new Set(blogs.value.filter(b => !b.deleted_at).map(b => b.category))]
-  const published = blogs.value.filter(b => !b.deleted_at).length
-  return {
-    total: total.value,
-    publishedBlogs: published,
-    categories: categories.length,
-    totalViews: 0 // implementasi jika ada views
-  }
-})
-
-const formatContent = (content: string, maxLength: number = 150) => {
-  if (!content) return '-'
-  const stripped = content.replace(/<[^>]*>/g, '')
-  return stripped.length > maxLength ? stripped.substring(0, maxLength) + '...' : stripped
+// Handle form save
+const handleBlogSaved = () => {
+  showSlideover.value = false
+  fetchBlogs()
+  toast.add({
+    title: mode.value === 'add' ? 'Blog added successfully!' : 'Blog updated successfully!',
+    color: 'success'
+  })
 }
 </script>
 
 <template>
   <div>
-    <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-newspaper" class="w-6 h-6" />
-            Kelola Blog
-          </h1>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Kelola artikel dan konten blog pesantren
-          </p>
-        </div>
-        <UButton
-          icon="i-lucide-plus"
-          size="sm"
-          @click="addBlog"
-        >
-          Tambah Blog
-        </UButton>
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <UIcon name="i-lucide-newspaper" class="w-6 h-6" />
+          Kelola Blog
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Kelola artikel dan konten blog pesantren
+        </p>
       </div>
+      <UButton
+        icon="i-heroicons-plus"
+        size="sm"
+        @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }"
+      >
+        Tambah Blog
+      </UButton>
     </div>
 
     <!-- Stats Cards -->
-    <BlogStats
-      :total-blogs="stats.total"
-      :published-blogs="stats.publishedBlogs"
-      :categories="stats.categories"
-      :total-views="stats.totalViews"
-      class="mb-8"
-    />
-
-    <!-- Filters and Search -->
-    <BlogFilters
-      :search="search"
-      :selected-category="selectedCategory"
-      :sort-by="sortBy"
-      :loading="pending"
-      @update:search="val => search.value = val"
-      @update:selectedCategory="val => selectedCategory.value = val"
-      @update:sortBy="val => sortBy.value = val"
-      @clear="clearFilters"
-      class="mb-6"
-    />
-
-    <!-- Loading State -->
-    <UCard v-if="pending">
-      <div class="space-y-4">
-        <div v-for="i in 5" :key="i" class="animate-pulse">
-          <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <UCard>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-file-text" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Blog</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.total }}</p>
+          </div>
         </div>
-      </div>
-    </UCard>
+      </UCard>
 
-    <!-- Error State -->
-    <UCard v-else-if="error">
-      <div class="text-center py-12">
-        <UIcon name="i-lucide-alert-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Terjadi Kesalahan
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-          Gagal memuat data blog. Silakan coba lagi.
-        </p>
-        <UButton @click="refresh" variant="outline">
-          <UIcon name="i-lucide-refresh-cw" class="mr-2" />
-          Coba Lagi
-        </UButton>
+      <UCard>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-check-circle" class="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Dipublikasi</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.published }}</p>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-layers" class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategori</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.categories }}</p>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-eye" class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Views</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.totalViews }}</p>
+          </div>
+        </div>
+      </UCard>
+    </div>
+
+    <!-- Filters -->
+    <UCard class="mb-6">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Search -->
+        <div class="flex-1">
+          <UInput
+            v-model="search"
+            icon="i-lucide-search"
+            placeholder="Cari judul, konten, atau tag blog..."
+            :trailing="search ? true : false"
+            :loading="loading"
+          >
+            <template v-if="search" #trailing>
+              <UButton
+                icon="i-lucide-x"
+                color="gray"
+                variant="link"
+                size="xs"
+                @click="search = ''"
+              />
+            </template>
+          </UInput>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <USelect
+            v-model="selectedCategory"
+            :options="categoryOptions"
+            placeholder="Filter Kategori"
+            class="w-full sm:w-40"
+          >
+            <template #leading>
+              <UIcon name="i-lucide-layers" class="w-4 h-4 text-gray-400" />
+            </template>
+          </USelect>
+
+          <USelect
+            v-model="sortBy"
+            :options="sortOptions"
+            placeholder="Urutkan"
+            class="w-full sm:w-32"
+          >
+            <template #leading>
+              <UIcon name="i-lucide-arrow-up-down" class="w-4 h-4 text-gray-400" />
+            </template>
+          </USelect>
+
+          <UCheckbox
+            v-model="includeDeleted"
+            label="Tampilkan yang dihapus"
+            class="flex items-center"
+          />
+
+          <UButton
+            v-if="search || (selectedCategory && selectedCategory !== 'all') || sortBy !== 'newest'"
+            icon="i-lucide-x"
+            color="gray"
+            variant="outline"
+            size="sm"
+            @click="clearFilters"
+          >
+            Reset
+          </UButton>
+        </div>
       </div>
     </UCard>
 
     <!-- Empty State -->
-    <UCard v-else-if="blogs.length === 0">
+    <UCard v-if="data.length === 0 && !loading">
       <div class="text-center py-12">
         <UIcon name="i-lucide-file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -453,7 +525,7 @@ const formatContent = (content: string, maxLength: number = 150) => {
             <UIcon name="i-lucide-refresh-cw" class="mr-2" />
             Reset Pencarian
           </UButton>
-          <UButton @click="addBlog">
+          <UButton @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }">
             <UIcon name="i-lucide-plus" class="mr-2" />
             Tambah Blog
           </UButton>
@@ -464,14 +536,13 @@ const formatContent = (content: string, maxLength: number = 150) => {
     <!-- Data Table -->
     <UCard v-else>
       <UTable 
-        :data="blogs" 
+        :data="data" 
         :columns="columns" 
-        :loading="pending"
+        :loading="loading"
         class="w-full"
       />
-      
-      <!-- Pagination -->
-      <template #footer>
+
+      <template #footer v-if="total > limit">
         <div class="flex justify-between items-center">
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Menampilkan {{ ((page - 1) * limit) + 1 }}-{{ Math.min(page * limit, total) }} 
@@ -490,198 +561,53 @@ const formatContent = (content: string, maxLength: number = 150) => {
       </template>
     </UCard>
 
-    <!-- Add Blog Slideover -->
-    <USlideover v-model="showAddModal" side="right">
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-plus-circle" class="w-5 h-5" />
-            Tambah Blog Baru
-          </h2>
-          <UButton
-            icon="i-lucide-x"
-            color="gray"
-            variant="ghost"
-            size="sm"
-            @click="showAddModal = false"
-          />
-        </div>
-        <BlogForm
+    <!-- Slideover Form -->
+    <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Blog' : 'Edit Blog'">
+      <template #body>
+        <BlogFormContent
+          :mode="mode"
+          :blog="selectedRow"
           @saved="handleBlogSaved"
-          @cancel="showAddModal = false"
+          @close="showSlideover = false"
         />
-      </div>
+      </template>
     </USlideover>
 
-    <!-- Edit Blog Slideover -->
-    <USlideover v-model="showEditModal" side="right">
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-edit" class="w-5 h-5" />
-            Edit Blog
-          </h2>
-          <UButton
-            icon="i-lucide-x"
-            color="gray"
-            variant="ghost"
-            size="sm"
-            @click="showEditModal = false"
-          />
-        </div>
-        <BlogForm
-          v-if="selectedBlog"
-          :blog="selectedBlog"
-          @saved="handleBlogSaved"
-          @cancel="showEditModal = false"
-        />
-      </div>
-    </USlideover>
-
-    <!-- Detail Blog Modal -->
+    <!-- Detail Modal -->
     <UModal v-model="showDetailModal" :ui="{ width: 'w-full max-w-4xl' }">
-      <UCard v-if="selectedBlog" :ui="{ header: { padding: 'px-4 py-4 sm:px-6' }, body: { padding: 'px-4 py-5 sm:p-6' } }">
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <UIcon name="i-lucide-file-text" class="w-5 h-5" />
+      <template #header>
+        <div class="flex items-center gap-3">
+          <UIcon name="i-lucide-file-text" class="w-6 h-6 text-primary" />
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
               Detail Blog
-            </h3>
-            <UButton
-              icon="i-lucide-x"
-              color="gray"
-              variant="ghost"
-              size="sm"
-              @click="showDetailModal = false"
-            />
-          </div>
-        </template>
-
-        <div class="space-y-6">
-          <!-- Blog Info -->
-          <div>
-            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Informasi Blog</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Judul</label>
-                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedBlog.title }}</p>
-              </div>
-              <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Slug</label>
-                <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white">{{ selectedBlog.slug }}</p>
-              </div>
-              <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategori</label>
-                <div class="mt-1">
-                  <UBadge variant="subtle" color="blue">{{ selectedBlog.category }}</UBadge>
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi</label>
-                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedBlog.description || '-' }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Author Info -->
-          <div>
-            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Penulis</h4>
-            <div class="flex items-center gap-3">
-              <img 
-                :src="selectedBlog.profiles?.avatar_url || 'https://placehold.co/48x48?text=?'"
-                :alt="selectedBlog.profiles?.full_name"
-                class="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <p class="font-medium text-gray-900 dark:text-white">{{ selectedBlog.profiles?.full_name || 'Unknown' }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Author</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tags -->
-          <div v-if="selectedBlog.tags && selectedBlog.tags.length > 0">
-            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Tags</h4>
-            <div class="flex flex-wrap gap-2">
-              <UBadge 
-                v-for="tag in selectedBlog.tags" 
-                :key="tag"
-                variant="outline"
-                color="primary"
-              >
-                {{ tag }}
-              </UBadge>
-            </div>
-          </div>
-
-          <!-- Content Preview -->
-          <div v-if="selectedBlog.content">
-            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Preview Konten</h4>
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-64 overflow-y-auto">
-              <p class="text-sm text-gray-700 dark:text-gray-300">
-                {{ formatContent(selectedBlog.content, 500) }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Meta Info -->
-          <div>
-            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Informasi Meta</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Dibuat</label>
-                <p class="mt-1 text-sm text-gray-900 dark:text-white">
-                  {{ new Date(selectedBlog.created_at).toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  }) }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Diperbarui</label>
-                <p class="mt-1 text-sm text-gray-900 dark:text-white">
-                  {{ new Date(selectedBlog.updated_at).toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  }) }}
-                </p>
-              </div>
-              <div v-if="selectedBlog.deleted_at">
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Dihapus</label>
-                <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {{ new Date(selectedBlog.deleted_at).toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  }) }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <UButton
-              variant="outline"
-              icon="i-lucide-external-link"
-              @click="navigateTo(`/blogs/${selectedBlog.slug}`, { external: true })"
-            >
-              Lihat di Web
-            </UButton>
-            <UButton
-              icon="i-lucide-edit"
-              @click="() => { showDetailModal = false; editBlog(selectedBlog!) }"
-            >
-              Edit Blog
-            </UButton>
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Informasi lengkap artikel blog
+            </p>
           </div>
         </div>
-      </UCard>
+      </template>
+
+      <BlogDetailContent
+        v-if="selectedRow"
+        :blog="selectedRow"
+      />
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            variant="outline"
+            icon="i-lucide-external-link"
+            @click="navigateTo(`/blogs/${selectedRow?.slug}`, { external: true })"
+          >
+            Lihat di Web
+          </UButton>
+          <UButton @click="showDetailModal = false" variant="outline">
+            Tutup
+          </UButton>
+        </div>
+      </template>
     </UModal>
   </div>
 </template>

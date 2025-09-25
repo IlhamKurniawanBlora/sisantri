@@ -1,23 +1,36 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { ref, h, resolveComponent, onMounted, computed, watch } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Row } from '@tanstack/vue-table'
+import { useClipboard } from '@vueuse/core'
+import SantriFormContent from '~/components/Admin/Santri/Form.vue'
+import SantriDetailContent from '~/components/Admin/Santri/Detail.vue'
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UUser = resolveComponent('UUser')
+const UInput = resolveComponent('UInput')
+const USelect = resolveComponent('USelect')
+const UCheckbox = resolveComponent('UCheckbox')
+const UCard = resolveComponent('UCard')
+const UTable = resolveComponent('UTable')
+const UPagination = resolveComponent('UPagination')
+const UIcon = resolveComponent('UIcon')
+const USlideover = resolveComponent('USlideover')
+const UModal = resolveComponent('UModal')
+
 const toast = useToast()
-const overlay = useOverlay()
+const { copy } = useClipboard()
 
 type Santri = {
   id: string
   nis: string
   full_name: string
   gender: 'male' | 'female'
-  birth_date: string
-  birth_place: string
-  image_url: string | null
+  birth_date?: string
+  birth_place?: string
+  image_url?: string | null
   address: string
   phone?: string
   parent_name?: string
@@ -26,15 +39,29 @@ type Santri = {
   status?: 'active' | 'graduated' | 'dropped_out' | 'inactive'
   created_at: string
   updated_at: string
-  deleted_at?: string
+  deleted_at?: string | null
 }
 
+// State management
+const data = ref<Santri[]>([])
+const loading = ref(false)
 const page = ref(1)
 const limit = ref(10)
 const search = ref('')
 const selectedGender = ref('all')
 const includeDeleted = ref(false)
+const total = ref(0)
 
+// Slideover states
+const showSlideover = ref(false)
+const mode = ref<'add' | 'edit'>('add')
+const selectedRow = ref<Santri | null>(null)
+
+// Modal states
+const showDetailModal = ref(false)
+const showConfirmDialog = ref(false)
+
+// Debounced search
 const debouncedSearch = ref('')
 let searchTimeout: NodeJS.Timeout
 
@@ -49,48 +76,55 @@ watch(search, (newValue) => {
   debounceSearch(newValue)
 })
 
-const queryParams = computed(() => {
-  const params: Record<string, any> = {
-    page: page.value,
-    limit: limit.value,
-    includeDeleted: includeDeleted.value
-  }
-  
-  if (debouncedSearch.value) params.search = debouncedSearch.value
-  if (selectedGender.value && selectedGender.value !== 'all') params.gender = selectedGender.value
-  
-  return params
-})
-
-const { data: res, pending, error, refresh } = await useAsyncData(
-  'admin-santris',
-  () => {
-    const params = new URLSearchParams()
-    Object.entries(queryParams.value).forEach(([key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) {
-        params.append(key, value.toString())
-      }
-    })
-    return $fetch(`/api/santris?${params.toString()}`)
-  },
-  {
-    watch: [queryParams]
-  }
-)
-
-const santris = computed(() => res.value?.data ?? [])
-const total = computed(() => res.value?.pagination?.total ?? 0)
-
 watch([debouncedSearch, selectedGender, includeDeleted], () => {
   page.value = 1
+  fetchSantris()
 })
 
+// Fetch data function
+async function fetchSantris() {
+  loading.value = true
+  try {
+    const params = new URLSearchParams({
+      page: page.value.toString(),
+      limit: limit.value.toString(),
+      includeDeleted: includeDeleted.value.toString()
+    })
+    
+    if (debouncedSearch.value) params.append('search', debouncedSearch.value)
+    if (selectedGender.value && selectedGender.value !== 'all') {
+      params.append('gender', selectedGender.value)
+    }
+
+    const response = await $fetch(`/api/santris?${params.toString()}`)
+    data.value = response.data || []
+    total.value = response.pagination?.total || 0
+  } catch (error) {
+    console.error('Error fetching santris:', error)
+    toast.add({
+      title: 'Error',
+      description: 'Gagal memuat data santri',
+      color: 'error'
+    })
+  }
+  loading.value = false
+}
+
+onMounted(fetchSantris)
+
+// Watch page changes
+watch(page, () => {
+  fetchSantris()
+})
+
+// Gender options
 const genderOptions = [
   { label: 'Semua Gender', value: 'all' },
   { label: 'Laki-laki', value: 'male' },
   { label: 'Perempuan', value: 'female' }
 ]
 
+// Table columns
 const columns: TableColumn<Santri>[] = [
   {
     accessorKey: 'full_name',
@@ -120,6 +154,11 @@ const columns: TableColumn<Santri>[] = [
     }
   },
   {
+    accessorKey: 'address',
+    header: 'Alamat',
+    cell: ({ row }) => h('span', { class: 'truncate max-w-xs', title: row.original.address }, row.original.address || '-')
+  },
+  {
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
@@ -127,191 +166,130 @@ const columns: TableColumn<Santri>[] = [
       const status = deletedAt ? 'inactive' : (row.original.status || 'active')
       const statusMap = {
         active: { label: 'Aktif', color: 'success' },
-        inactive: { label: 'Tidak Aktif', color: 'neutral' }
+        inactive: { label: 'Tidak Aktif', color: 'neutral' },
+        graduated: { label: 'Lulus', color: 'blue' },
+        dropped_out: { label: 'Keluar', color: 'orange' }
       }
       const info = statusMap[status as keyof typeof statusMap]
       return h(UBadge, { variant: 'subtle', color: info?.color || 'neutral' }, () => info?.label || status)
     }
   },
   {
-    accessorKey: 'address',
-    header: 'Alamat',
-    cell: ({ row }) => h('span', { class: 'truncate max-w-xs', title: row.original.address }, row.original.address || '-')
-  },
-  {
     accessorKey: 'created_at',
     header: 'Dibuat',
     cell: ({ row }) => {
       const date = row.getValue('created_at') as string
-      return h('span', {}, date
-        ? new Date(date).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          })
-        : '-')
+      return new Date(date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
     }
   },
   {
     id: 'actions',
+    header: 'Actions',
     cell: ({ row }) =>
-      h('div', { class: 'text-right' },
-        h(UDropdownMenu,
-          { items: getRowItems(row) },
+      h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            items: getRowItems(row),
+            'aria-label': 'Actions dropdown',
+            content: { align: 'end' }
+          },
           () =>
             h(UButton, {
-              icon: 'i-lucide-more-vertical',
+              icon: 'i-lucide-ellipsis-vertical',
               color: 'neutral',
               variant: 'ghost',
-              size: 'sm'
+              'aria-label': 'Actions'
             })
         )
       )
   }
 ]
 
+// Row actions
 function getRowItems(row: Row<Santri>) {
   const santri = row.original
   
   const items = [
-    [{
+    { type: 'label', label: 'Actions' },
+    {
+      label: 'Copy NIS',
+      icon: 'i-lucide-copy',
+      onSelect() {
+        copy(santri.nis)
+        toast.add({ title: 'NIS copied!', color: 'success', icon: 'i-lucide-check' })
+      }
+    },
+    { type: 'separator' },
+    {
       label: 'Detail',
       icon: 'i-lucide-eye',
-      click: () => viewSantri(santri)
-    }],
-    [{
+      onSelect() {
+        selectedRow.value = santri
+        showDetailModal.value = true
+      }
+    },
+    {
       label: 'Edit',
-      icon: 'i-lucide-edit',
-      click: () => editSantri(santri)
-    }]
+      icon: 'i-lucide-pencil',
+      onSelect() {
+        mode.value = 'edit'
+        selectedRow.value = santri
+        showSlideover.value = true
+      }
+    }
   ]
 
   if (!santri.deleted_at) {
-    items.push([{
-      label: 'Hapus',
-      icon: 'i-lucide-trash-2',
-      click: () => deleteSantri(santri.id)
-    }])
+    items.push({
+      label: 'Delete',
+      icon: 'i-lucide-trash',
+      class: 'text-red-500',
+      onSelect: () => deleteSantri(santri.id)
+    })
   } else {
-    items.push([{
-      label: 'Pulihkan',
+    items.push({
+      label: 'Restore',
       icon: 'i-lucide-undo-2',
-      click: () => restoreSantri(santri.id)
-    }])
+      onSelect: () => restoreSantri(santri.id)
+    })
   }
-  
+
   return items
 }
 
-// Create overlay instances
-import AdminSantriForm from '~/components/Admin/Santri/Form.vue'
-import AdminSantriDetail from '~/components/Admin/Santri/Detail.vue'
-import ConfirmDialog from '~/components/Admin/ConfirmDialog.vue'
-const santriFormSlideover = overlay.create(AdminSantriForm)
-const santriDetailModal = overlay.create('AdminSantriDetail')
-const confirmDialog = overlay.create('ConfirmDialog')
-
-const addSantri = () => {
-  santriFormSlideover.open({
-    title: 'Tambah Santri Baru',
-    icon: 'i-lucide-plus-circle',
-    onSaved: (isEdit = false) => handleSantriSaved(isEdit),
-    onCancel: () => santriFormSlideover.close()
-  })
-}
-
-const viewSantri = (santri: Santri) => {
-  santriDetailModal.open({
-    title: 'Detail Santri',
-    icon: 'i-lucide-user',
-    santri,
-    onClose: () => santriDetailModal.close()
-  })
-}
-
-const editSantri = (santri: Santri) => {
-  santriFormSlideover.open({
-    title: 'Edit Santri',
-    icon: 'i-lucide-edit',
-    santri,
-    onSaved: (isEdit = true) => handleSantriSaved(isEdit),
-    onCancel: () => santriFormSlideover.close()
-  })
-}
-
-const deleteSantri = async (id: string) => {
-  const confirmInstance = confirmDialog.open({
-    title: 'Hapus Santri',
-    description: 'Apakah Anda yakin ingin menghapus santri ini?',
-    confirmText: 'Hapus',
-    cancelText: 'Batal',
-    variant: 'destructive'
-  })
-
-  const isConfirmed = await confirmInstance
-  if (!isConfirmed) return
-  
+// CRUD operations
+async function deleteSantri(id: string) {
   try {
     await $fetch(`/api/santris/${id}`, { method: 'DELETE' })
-    toast.add({
-      title: 'Santri berhasil dihapus!',
-      color: 'success'
-    })
-    refresh()
+    toast.add({ title: 'Santri deleted!', color: 'success', icon: 'i-lucide-trash' })
+    fetchSantris()
   } catch (error) {
-    toast.add({
-      title: 'Gagal menghapus santri',
-      color: 'error'
-    })
+    toast.add({ title: 'Failed to delete santri', color: 'error' })
   }
 }
 
-const restoreSantri = async (id: string) => {
-  const confirmInstance = confirmDialog.open({
-    title: 'Pulihkan Santri',
-    description: 'Apakah Anda yakin ingin memulihkan santri ini?',
-    confirmText: 'Pulihkan',
-    cancelText: 'Batal'
-  })
-
-  const isConfirmed = await confirmInstance
-  if (!isConfirmed) return
-  
+async function restoreSantri(id: string) {
   try {
     await $fetch(`/api/santris/${id}/restore`, { method: 'POST' })
-    toast.add({
-      title: 'Santri berhasil dipulihkan!',
-      color: 'success'
-    })
-    refresh()
+    toast.add({ title: 'Santri restored!', color: 'success', icon: 'i-lucide-undo-2' })
+    fetchSantris()
   } catch (error) {
-    toast.add({
-      title: 'Gagal memulihkan santri',
-      color: 'error'
-    })
+    toast.add({ title: 'Failed to restore santri', color: 'error' })
   }
 }
 
-const handleSantriSaved = (isEdit = false) => {
-  santriFormSlideover.close()
-  refresh()
-  toast.add({
-    title: isEdit ? 'Santri berhasil diperbarui!' : 'Santri berhasil ditambahkan!',
-    color: 'success'
-  })
-}
-
-const clearFilters = () => {
-  search.value = ''
-  debouncedSearch.value = ''
-  selectedGender.value = 'all'
-  page.value = 1
-}
-
+// Stats computed
 const stats = computed(() => {
-  const activeSantris = santris.value.filter(s => !s.deleted_at && (s.status === 'active' || !s.status))
-  const maleSantris = santris.value.filter(s => s.gender === 'male' && !s.deleted_at)
-  const femaleSantris = santris.value.filter(s => s.gender === 'female' && !s.deleted_at)
+  const activeSantris = data.value.filter(s => !s.deleted_at && (s.status === 'active' || !s.status))
+  const maleSantris = data.value.filter(s => s.gender === 'male' && !s.deleted_at)
+  const femaleSantris = data.value.filter(s => s.gender === 'female' && !s.deleted_at)
   
   return {
     total: total.value,
@@ -320,41 +298,59 @@ const stats = computed(() => {
     female: femaleSantris.length
   }
 })
+
+// Clear filters
+const clearFilters = () => {
+  search.value = ''
+  debouncedSearch.value = ''
+  selectedGender.value = 'all'
+  page.value = 1
+}
+
+// Handle form save
+const handleSantriSaved = () => {
+  showSlideover.value = false
+  fetchSantris()
+  toast.add({
+    title: mode.value === 'add' ? 'Santri added successfully!' : 'Santri updated successfully!',
+    color: 'success'
+  })
+}
 </script>
 
 <template>
   <div>
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-users" class="w-6 h-6" />
-            Kelola Santri
-          </h1>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Kelola data santri pesantren
-          </p>
-        </div>
-        <UButton
-          icon="i-lucide-plus"
-          size="sm"
-          @click="addSantri"
-        >
-          Tambah Santri
-        </UButton>
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <UIcon name="i-lucide-users" class="w-6 h-6" />
+          Kelola Santri
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Kelola data santri pesantren
+        </p>
       </div>
+      <UButton
+        icon="i-heroicons-plus"
+        size="sm"
+        @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }"
+      >
+        Tambah Santri
+      </UButton>
     </div>
 
+    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <UCard>
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-              <UIcon name="i-lucide-users" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-users" class="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Santri</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
             <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.total }}</p>
           </div>
         </div>
@@ -363,8 +359,8 @@ const stats = computed(() => {
       <UCard>
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-              <UIcon name="i-lucide-check-circle" class="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-check-circle" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
           <div class="ml-4">
@@ -403,6 +399,7 @@ const stats = computed(() => {
       </UCard>
     </div>
 
+    <!-- Filters -->
     <UCard class="mb-6">
       <div class="flex flex-col lg:flex-row gap-4">
         <!-- Search -->
@@ -412,7 +409,7 @@ const stats = computed(() => {
             icon="i-lucide-search"
             placeholder="Cari nama, NIS, atau alamat santri..."
             :trailing="search ? true : false"
-            :loading="pending"
+            :loading="loading"
           >
             <template v-if="search" #trailing>
               <UButton
@@ -430,7 +427,7 @@ const stats = computed(() => {
         <div class="flex flex-col sm:flex-row gap-2">
           <USelect
             v-model="selectedGender"
-            :items="genderOptions"
+            :options="genderOptions"
             placeholder="Filter Gender"
             class="w-full sm:w-40"
           >
@@ -459,31 +456,8 @@ const stats = computed(() => {
       </div>
     </UCard>
 
-    <UCard v-if="pending">
-      <div class="space-y-4">
-        <div v-for="i in 5" :key="i" class="animate-pulse">
-          <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
-        </div>
-      </div>
-    </UCard>
-
-    <UCard v-else-if="error">
-      <div class="text-center py-12">
-        <UIcon name="i-lucide-alert-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Terjadi Kesalahan
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-          Gagal memuat data santri. Silakan coba lagi.
-        </p>
-        <UButton @click="refresh" variant="outline">
-          <UIcon name="i-lucide-refresh-cw" class="mr-2" />
-          Coba Lagi
-        </UButton>
-      </div>
-    </UCard>
-
-    <UCard v-else-if="santris.length === 0">
+    <!-- Empty State -->
+    <UCard v-if="data.length === 0 && !loading">
       <div class="text-center py-12">
         <UIcon name="i-lucide-users" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -500,7 +474,7 @@ const stats = computed(() => {
             <UIcon name="i-lucide-refresh-cw" class="mr-2" />
             Reset Pencarian
           </UButton>
-          <UButton @click="addSantri">
+          <UButton @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }">
             <UIcon name="i-lucide-plus" class="mr-2" />
             Tambah Santri
           </UButton>
@@ -508,15 +482,16 @@ const stats = computed(() => {
       </div>
     </UCard>
 
+    <!-- Data Table -->
     <UCard v-else>
       <UTable 
-        :data="santris" 
+        :data="data" 
         :columns="columns" 
-        :loading="pending"
+        :loading="loading"
         class="w-full"
       />
 
-      <template #footer>
+      <template #footer v-if="total > limit">
         <div class="flex justify-between items-center">
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Menampilkan {{ ((page - 1) * limit) + 1 }}-{{ Math.min(page * limit, total) }} 
@@ -534,5 +509,47 @@ const stats = computed(() => {
         </div>
       </template>
     </UCard>
+
+    <!-- Slideover Form -->
+    <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Santri' : 'Edit Santri'">
+      <template #body>
+        <SantriFormContent
+          :mode="mode"
+          :santri="selectedRow"
+          @saved="handleSantriSaved"
+          @close="showSlideover = false"
+        />
+      </template>
+    </USlideover>
+
+    <!-- Detail Modal -->
+    <UModal v-model="showDetailModal" :ui="{ width: 'w-full max-w-4xl' }">
+      <template #header>
+        <div class="flex items-center gap-3">
+          <UIcon name="i-lucide-user" class="w-6 h-6 text-primary" />
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+              Detail Santri
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Informasi lengkap data santri
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <SantriDetailContent
+        v-if="selectedRow"
+        :santri="selectedRow"
+      />
+
+      <template #footer>
+        <div class="flex justify-end">
+          <UButton @click="showDetailModal = false" variant="outline">
+            Tutup
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

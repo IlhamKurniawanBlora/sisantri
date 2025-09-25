@@ -4,6 +4,10 @@ import { useAuth } from '~/composables/useAuth'
 import { useNuxtApp, useToast } from '#imports'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+definePageMeta({
+  layout : 'admin'
+})
+
 const { user } = useAuth()
 const supabase = useNuxtApp().$supabase as SupabaseClient
 const toast = useToast()

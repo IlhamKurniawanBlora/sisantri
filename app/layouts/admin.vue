@@ -52,9 +52,13 @@ const sidebarLinks = [
 ]
 
 const userMenuItems = [
-  { label: 'Profile', icon: 'i-lucide-user', click: () => navigateTo('/admin/profile') },
-  { label: 'Settings', icon: 'i-lucide-settings', click: () => navigateTo('/admin/settings') },
-  { label: 'Logout', icon: 'i-lucide-log-out', click: handleLogout }
+  { label: 'Profile', icon: 'i-lucide-user', onSelect() {
+        navigateTo(`/admin/profile`)
+      } },
+  { label: 'Settings', icon: 'i-lucide-settings', onSelect() {
+        navigateTo('/admin/settings')
+      } },
+  { label: 'Logout', icon: 'i-lucide-log-out', onSelect: handleLogout }
 ]
 </script>
 
@@ -100,7 +104,7 @@ const userMenuItems = [
         <UDropdownMenu :items="userMenuItems" :popper="{ placement: 'top-start' }">
           <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
             <UAvatar
-              :src="userProfile?.avatar_url || '/api/placeholder/40/40'"
+              :src="userProfile?.avatar_url || ''"
               :alt="userProfile?.name || 'Admin User'"
               size="sm"
               class="mr-3"

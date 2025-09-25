@@ -162,7 +162,6 @@ function getRowItems(row: Row<Carousel>) {
   ]
 }
 
-// tambah carousel
 async function handleAdd() {
   if (!formState.file) {
     toast.add({ title: 'Pilih file terlebih dahulu', color: 'error' })
@@ -182,7 +181,6 @@ async function handleAdd() {
   }
 }
 
-// update carousel
 async function handleEdit() {
   if (!formState.file || !selectedRow.value) {
     toast.add({ title: 'Pilih file terlebih dahulu', color: 'error' })
@@ -214,7 +212,6 @@ function handleFileChange(e: Event) {
 
 <template>
   <div>
-    <!-- Header -->
     <div class="mb-8 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Carousel</h1>
@@ -231,10 +228,8 @@ function handleFileChange(e: Event) {
       </UButton>
     </div>
 
-    <!-- Table -->
     <UTable :data="data" :columns="columns" :loading="loading" class="flex-1" />
 
-    <!-- Slideover -->
     <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Carousel' : 'Edit Carousel'">
       <template #body>
         <UForm @submit.prevent="mode === 'add' ? handleAdd() : handleEdit()">

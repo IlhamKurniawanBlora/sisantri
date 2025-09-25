@@ -49,10 +49,20 @@
           Temukan informasi santri dan berita terbaru dari pondok pesantren
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <UButton size="lg" to="/santri" class="text-white">
+            <UButton 
+            size="lg" 
+            to="/santri" 
+            class="text-white w-full sm:w-auto px-8 py-3 sm:px-6 sm:py-2"
+            >
+            <UIcon name="i-lucide-user-search" class="mr-2 h-5 w-5" />
             Cari Santri
-          </UButton>
-          <UButton size="lg" variant="outline" to="/about">
+            </UButton>
+          <UButton 
+            size="lg" 
+            variant="outline" 
+            to="/about"
+            class="w-full sm:w-auto px-8 py-3 sm:px-6 sm:py-2"
+          >
             Pelajari Lebih Lanjut
           </UButton>
         </div>

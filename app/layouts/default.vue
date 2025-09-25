@@ -28,18 +28,6 @@ const handleLogout = async () => {
     <!-- Header -->
     <AppHeader />
 
-    <!-- Logout button (atas kanan) -->
-    <div v-if="user" class="flex justify-end px-4 pt-2">
-      <UButton
-        icon="i-lucide-log-out"
-        size="sm"
-        color="error"
-        @click="handleLogout"
-      >
-        Logout
-      </UButton>
-    </div>
-
     <!-- Main content -->
     <main class="container mx-auto flex-1 px-4 py-6">
       <slot />
