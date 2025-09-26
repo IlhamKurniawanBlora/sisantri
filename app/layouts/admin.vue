@@ -15,7 +15,11 @@ type UserProfile = {
 const userProfile = ref<UserProfile | null>(null)
 
 const fetchUserProfile = async () => {
-  if (!user.value) return
+  if (!user.value) {
+    toast.add({ title: 'Error', description: 'User not logged in', color: 'error' })
+    navigateTo('/')
+    return
+  }
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -73,13 +77,13 @@ const userMenuItems = [
     >
       <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
         <div class="flex items-center space-x-2">
-          <UIcon name="i-heroicons-academic-cap" class="w-8 h-8 text-primary-500" />
+          <UIcon name="i-lucide-users" class="w-8 h-8 text-primary-500" />
           <span class="text-xl font-bold text-gray-900 dark:text-white">Admin SiDawam</span>
         </div>
         <UButton
           variant="ghost"
           size="sm"
-          icon="i-heroicons-x-mark"
+          icon="i-lucide-x"
           class="lg:hidden"
           @click="sidebarOpen = false"
         />
@@ -111,7 +115,7 @@ const userMenuItems = [
             />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {{ userProfile?.name || 'Admin User' }}
+                {{ userProfile?.full_name || 'Admin' }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                 {{ user?.email || 'admin@example.com' }}
@@ -138,13 +142,13 @@ const userMenuItems = [
           <UButton
             variant="ghost"
             size="sm"
-            icon="i-heroicons-bars-3"
+            icon="i-lucide-menu"
             class="lg:hidden"
             @click="sidebarOpen = true"
           />
           <div class="flex-1 max-w-md mx-4">
             <UInput
-              icon="i-heroicons-magnifying-glass"
+              icon="i-lucide-search"
               placeholder="Search..."
               class="w-full"
             />

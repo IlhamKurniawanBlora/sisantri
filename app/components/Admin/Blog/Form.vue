@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, computed, watch, resolveComponent } from 'vue'
+import { reactive, computed, watch, resolveComponent, ref, onBeforeUnmount } from 'vue'
 
 const UForm = resolveComponent('UForm')
 const UFormField = resolveComponent('UFormField')
@@ -16,14 +16,14 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  saved: []
+  saved: [data?: any]
   close: []
 }>()
 
+// Use $fetch directly from Nuxt's global
 const toast = useToast()
 const loading = ref(false)
 
-// Form state
 const formState = reactive({
   title: '',
   slug: '',
@@ -37,7 +37,7 @@ const formState = reactive({
   previewUrl: null as string | null
 })
 
-// Initialize form with blog data if editing
+// Initialize form data for edit mode
 if (props.mode === 'edit' && props.blog) {
   Object.assign(formState, {
     title: props.blog.title || '',
@@ -45,13 +45,12 @@ if (props.mode === 'edit' && props.blog) {
     description: props.blog.description || '',
     content: props.blog.content || '',
     category: props.blog.category || 'akademik',
-    tags: props.blog.tags || [],
+    tags: Array.isArray(props.blog.tags) ? props.blog.tags : [],
     image_url: props.blog.image_url || '',
     previewUrl: props.blog.image_url || null
   })
 }
 
-// Category options
 const categoryOptions = [
   { label: 'Akademik', value: 'akademik' },
   { label: 'Kegiatan', value: 'kegiatan' },
@@ -60,38 +59,62 @@ const categoryOptions = [
   { label: 'Pengumuman', value: 'pengumuman' }
 ]
 
-// Generate slug from title
 const generateSlug = (title: string) => {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
     .trim()
 }
 
-// Watch title changes to auto-generate slug
+// Auto-generate slug only for add mode
 watch(() => formState.title, (newTitle) => {
   if (props.mode === 'add' && newTitle) {
     formState.slug = generateSlug(newTitle)
   }
 })
 
-// Form validation
 const isFormValid = computed(() => {
   return formState.title && formState.slug && formState.category && formState.content && formState.description
 })
 
-// Handle file change
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    formState.file = target.files[0]
-    formState.previewUrl = URL.createObjectURL(target.files[0])
+    const file = target.files[0]
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.add({
+        title: 'File tidak valid',
+        description: 'Hanya file gambar yang diperbolehkan',
+        color: 'error'
+      })
+      return
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.add({
+        title: 'File terlalu besar',
+        description: 'Ukuran file maksimal 5MB',
+        color: 'error'
+      })
+      return
+    }
+    
+    formState.file = file
+    
+    // Create preview URL
+    if (formState.previewUrl && formState.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(formState.previewUrl)
+    }
+    formState.previewUrl = URL.createObjectURL(file)
   }
 }
 
-// Handle tag input
 function handleTagInput(e: KeyboardEvent) {
   if (e.key === 'Enter' || e.key === ',') {
     e.preventDefault()
@@ -100,7 +123,7 @@ function handleTagInput(e: KeyboardEvent) {
 }
 
 function addTag() {
-  const tag = formState.tagInput.trim()
+  const tag = formState.tagInput.trim().toLowerCase()
   if (tag && !formState.tags.includes(tag)) {
     formState.tags.push(tag)
     formState.tagInput = ''
@@ -111,7 +134,6 @@ function removeTag(index: number) {
   formState.tags.splice(index, 1)
 }
 
-// Handle form submission
 async function handleSubmit() {
   if (!isFormValid.value) {
     toast.add({
@@ -126,52 +148,72 @@ async function handleSubmit() {
   
   try {
     const formData = new FormData()
-    
-    // Append form data
-    Object.entries(formState).forEach(([key, value]) => {
-      if (key !== 'file' && key !== 'previewUrl' && key !== 'tagInput' && value !== null && value !== '') {
-        if (key === 'tags') {
-          formData.append(key, JSON.stringify(value))
-        } else {
-          formData.append(key, value)
-        }
-      }
-    })
-    
-    // Append file if present
+    formData.append('title', formState.title)
+    formData.append('slug', formState.slug)
+    formData.append('description', formState.description)
+    formData.append('content', formState.content)
+    formData.append('category', formState.category)
+    formData.append('tags', JSON.stringify(formState.tags))
+
+    // Hanya kirim file jika ada file baru
     if (formState.file) {
       formData.append('file', formState.file)
+    } else if (formState.image_url) {
+      // Kirim image_url jika tidak ada file baru
+      formData.append('image_url', formState.image_url)
     }
 
-    const url = props.mode === 'edit' ? `/api/blogs/${props.blog.slug}` : '/api/blogs'
-    const method = props.mode === 'edit' ? 'PUT' : 'POST'
-    
-    await $fetch(url, {
+    let url = '/api/blogs'
+    let method = 'POST'
+    if (props.mode === 'edit' && props.blog?.id) {
+      formData.append('id', props.blog.id)
+    }
+
+    const response = await $fetch(url, {
       method,
       body: formData
     })
-
     toast.add({
       title: props.mode === 'edit' ? 'Blog berhasil diperbarui!' : 'Blog berhasil ditambahkan!',
       color: 'success'
     })
-
-    emit('saved')
+    emit('saved', response.data)
   } catch (error: any) {
+    console.error('Form submission error:', error)
+
+    let errorMessage = 'Terjadi kesalahan'
+
+    if (error?.data?.statusMessage) {
+      errorMessage = error.data.statusMessage
+    } else if (error?.data?.message) {
+      errorMessage = error.data.message
+    } else if (error?.statusMessage) {
+      errorMessage = error.statusMessage
+    } else if (error?.message) {
+      errorMessage = error.message
+    }
+
     toast.add({
       title: `Gagal ${props.mode === 'edit' ? 'memperbarui' : 'menambahkan'} blog`,
-      description: error?.data?.message || error.message || 'Terjadi kesalahan',
+      description: errorMessage,
       color: 'error'
     })
   } finally {
     loading.value = false
   }
 }
+
+// Cleanup preview URL on unmount
+onBeforeUnmount(() => {
+  if (formState.previewUrl && formState.previewUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(formState.previewUrl)
+  }
+})
 </script>
 
 <template>
   <UForm @submit.prevent="handleSubmit" class="space-y-6 w-full">
-    <!-- Featured Image -->
+    <!-- Image Upload -->
     <UFormField label="Gambar Utama" name="image" class="w-full">
       <UInput 
         type="file" 
@@ -189,32 +231,37 @@ async function handleSubmit() {
       </div>
     </UFormField>
 
+    <!-- Title -->
     <UFormField label="Judul Blog" name="title" required class="w-full">
       <UInput 
         v-model="formState.title" 
         placeholder="Masukkan judul blog"
         class="w-full"
+        :disabled="loading"
       />
     </UFormField>
 
+    <!-- Slug -->
     <UFormField label="Slug" name="slug" required class="w-full">
       <UInput 
         v-model="formState.slug" 
         placeholder="url-friendly-slug"
-        :disabled="mode === 'edit'"
+        :disabled="mode === 'edit' || loading"
         class="w-full"
       />
       <template #help>
         URL blog akan menjadi: /blogs/{{ formState.slug }}
       </template>
     </UFormField>
-    
+
+    <!-- Category -->
     <UFormField label="Kategori" name="category" required class="w-full">
       <USelect 
         v-model="formState.category" 
-        :options="categoryOptions"
+        :items="categoryOptions"
         placeholder="Pilih kategori"
         class="w-full"
+        :disabled="loading"
       />
     </UFormField>
 
@@ -223,8 +270,9 @@ async function handleSubmit() {
       <UTextarea 
         v-model="formState.description" 
         placeholder="Masukkan deskripsi singkat blog"
-        rows="3"
+        :rows="3"
         class="w-full"
+        :disabled="loading"
       />
     </UFormField>
 
@@ -236,6 +284,7 @@ async function handleSubmit() {
           placeholder="Ketik tag dan tekan Enter atau koma"
           @keydown="handleTagInput"
           class="w-full"
+          :disabled="loading"
         />
         <div v-if="formState.tags.length > 0" class="flex flex-wrap gap-2 w-full">
           <UBadge
@@ -249,7 +298,8 @@ async function handleSubmit() {
             <button
               type="button"
               @click="removeTag(index)"
-              class="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :disabled="loading"
+              class="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
             >
               <UIcon name="i-lucide-x" class="w-3 h-3" />
             </button>
@@ -263,15 +313,16 @@ async function handleSubmit() {
       <UTextarea 
         v-model="formState.content" 
         placeholder="Tulis konten blog di sini..."
-        rows="10"
+        :rows="10"
         class="w-full"
+        :disabled="loading"
       />
       <template #help>
         Anda bisa menggunakan HTML untuk formatting konten
       </template>
     </UFormField>
 
-    <!-- Submit Buttons -->
+    <!-- Form Actions -->
     <div class="flex justify-end gap-3 pt-6 border-t w-full">
       <UButton 
         variant="outline" 
@@ -283,7 +334,7 @@ async function handleSubmit() {
       <UButton 
         type="submit"
         :loading="loading"
-        :disabled="!isFormValid"
+        :disabled="!isFormValid || loading"
         color="primary"
       >
         {{ mode === 'add' ? 'Publikasikan' : 'Update Blog' }}

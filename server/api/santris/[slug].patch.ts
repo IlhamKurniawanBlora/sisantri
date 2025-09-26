@@ -109,7 +109,6 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       data,
-      message: 'Blog updated successfully'
     }
   } catch (err: any) {
     throw createError({

@@ -220,7 +220,7 @@ function handleFileChange(e: Event) {
         </p>
       </div>
       <UButton
-        icon="i-heroicons-plus"
+        icon="i-lucide-plus"
         size="sm"
         @click="() => { mode = 'add'; selectedRow = null; formState.previewUrl = null; showSlideover = true }"
       >

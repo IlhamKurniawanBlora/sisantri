@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: 'admin',
-  title: 'Manajemen Santris'
+  // middleware: 'admin'
 })
 
 </script>

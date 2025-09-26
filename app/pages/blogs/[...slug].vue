@@ -39,6 +39,10 @@ useHead({
     {
       property: 'og:type',
       content: 'article'
+    },
+    {
+      property: 'og:image',
+      content: () => blog.value?.image_url || ''
     }
   ]
 })
@@ -92,13 +96,13 @@ const copyLink = async () => {
     toast.add({
       title: 'Link berhasil disalin!',
       description: 'Link artikel telah disalin ke clipboard',
-      icon: 'i-heroicons-check-circle'
+      icon: 'i-lucide-clipboard-check',
     })
   } catch (err) {
     toast.add({
       title: 'Gagal menyalin link',
       description: 'Terjadi kesalahan saat menyalin link',
-      icon: 'i-heroicons-exclamation-circle',
+      icon: 'i-lucide-clipboard-x',
       color: 'error'
     })
   }
@@ -170,6 +174,18 @@ const formattedContent = computed(() => {
           {{ blog.description }}
         </p>
 
+        <!-- Featured Image -->
+        <div v-if="blog.image_url" class="mb-6">
+          <div class="relative overflow-hidden rounded-lg shadow-lg">
+            <img 
+              :src="blog.image_url" 
+              :alt="blog.title"
+              class="w-full h-auto max-h-96 object-cover"
+              loading="lazy"
+            />
+          </div>
+        </div>
+
         <!-- Meta Info Card -->
         <UCard class="mb-6">
           <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-300">
@@ -181,14 +197,14 @@ const formattedContent = computed(() => {
                 size="sm"
                 :ui="{ placeholder: 'flex items-center justify-center bg-gray-500 dark:bg-gray-400' }"
               >
-                <UIcon name="i-heroicons-user" v-if="!blog.profiles?.avatar_url" />
+                <UIcon name="i-lucide-user" v-if="!blog.profiles?.avatar_url" />
               </UAvatar>
               <span class="font-medium">{{ blog.profiles?.full_name || 'admin SiDawam' }}</span>
             </div>
 
             <!-- Date -->
             <div class="flex items-center gap-2">
-              <UIcon name="i-heroicons-calendar-days" class="text-primary-500" />
+              <UIcon name="i-lucide-calendar" class="text-primary-500" />
               <time :datetime="blog.created_at">
                 {{ formatDate(blog.created_at) }}
               </time>
@@ -196,13 +212,13 @@ const formattedContent = computed(() => {
 
             <!-- Reading Time -->
             <div class="flex items-center gap-2">
-              <UIcon name="i-heroicons-clock" class="text-primary-500" />
+              <UIcon name="i-lucide-clock" class="text-primary-500" />
               <span>{{ calculateReadingTime(blog.content || '') }} menit baca</span>
             </div>
 
             <!-- Views -->
             <div v-if="blog.views" class="flex items-center gap-2">
-              <UIcon name="i-heroicons-eye" class="text-primary-500" />
+              <UIcon name="i-lucide-eye" class="text-primary-500" />
               <span>{{ blog.views.toLocaleString() }} views</span>
             </div>
           </div>
@@ -256,7 +272,7 @@ const formattedContent = computed(() => {
                 color="neutral"
                 variant="ghost"
                 size="sm"
-                icon="i-heroicons-link"
+                icon="i-lucide-link"
                 aria-label="Salin link"
               />
             </div>
@@ -282,7 +298,7 @@ const formattedContent = computed(() => {
               size="lg"
               :ui="{ placeholder: 'flex items-center justify-center bg-gray-500 dark:bg-gray-400' }"
             >
-              <UIcon name="i-heroicons-user" v-if="!blog.profiles.avatar_url" class="w-8 h-8" />
+              <UIcon name="i-lucide-user" v-if="!blog.profiles.avatar_url" class="w-8 h-8" />
             </UAvatar>
             <div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
@@ -301,7 +317,7 @@ const formattedContent = computed(() => {
             to="/blogs"
             color="neutral"
             variant="outline"
-            icon="i-heroicons-arrow-left"
+            icon="i-lucide-arrow-left"
           >
             Kembali ke Blog
           </UButton>
@@ -311,7 +327,7 @@ const formattedContent = computed(() => {
 
     <!-- Error State -->
     <div v-else-if="error" class="max-w-2xl mx-auto text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-500 mx-auto mb-4" />
+      <UIcon name="i-lucide-info" class="w-16 h-16 text-red-500 mx-auto mb-4" />
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
         Blog tidak ditemukan
       </h1>

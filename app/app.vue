@@ -1,42 +1,27 @@
-<script lang="ts" setup>
-// Optional: Provide global values that can be accessed by overlays
-// Since overlays are mounted outside page context, they can only access
-// injected values from components containing UApp (like app.vue)
-
-// Example: Provide global configuration or services
-// provide('globalConfig', {
-//   apiBaseUrl: '/api',
-//   appName: 'Pesantren Management'
-// })
-
-// Optional: Global error handling for overlays
-// const toast = useToast()
-// provide('toast', toast)
+<script setup lang="ts">
 </script>
 
 <template>
   <UApp>
+    <!-- Accessibility -->
     <NuxtRouteAnnouncer />
-    <UMain>
-      <NuxtLayout>
-        <Transition
-          name="page"
-          mode="out-in"
-          appear
-        >
-          <div>
+
+    <!-- Global Layout -->
+    <NuxtLayout>
+      <UMain>
+        <Transition name="page" mode="out-in" appear>
+          <!-- Bungkus NuxtPage dengan elemen tunggal -->
+          <div class="page-wrapper">
             <NuxtPage />
           </div>
         </Transition>
-      </NuxtLayout>
-    </UMain>
-    
-    <!-- Optional: Global overlay configuration -->
-    <!-- UApp automatically handles overlay mounting, no additional setup needed -->
+      </UMain>
+    </NuxtLayout>
   </UApp>
 </template>
 
 <style>
+/* Page transition */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -47,7 +32,7 @@
   transform: translateY(10px);
 }
 
-/* Optional: Global overlay styles */
+/* Optional: Overlay animation */
 .overlay-enter-active,
 .overlay-leave-active {
   transition: all 0.3s ease;

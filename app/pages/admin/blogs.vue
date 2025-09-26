@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: 'admin',
-  title: 'Manajemen Blogs'
+  // middleware: 'admin'
+})
+useHead({
+  title: 'Manajemen Blog - SiDawam'
 })
 
 </script>

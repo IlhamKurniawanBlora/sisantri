@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { useAuth } from '@/composables/useAuth'
 
-// Types
+definePageMeta({
+  layout: 'admin',
+  // middleware: 'admin'
+})
 interface UserProfile {
   id: string
   name: string
@@ -34,11 +37,6 @@ interface Stats {
   activeUsers: number
 }
 
-// Page meta
-definePageMeta({
-  layout: 'admin',
-})
-
 // Composables
 const { user } = useAuth()
 const supabase = useNuxtApp().$supabase
@@ -48,8 +46,6 @@ const userProfile = ref<UserProfile | null>(null)
 const stats = ref<Stats>({
   totalSantris: 0,
   totalBlogs: 0,
-  totalViews: 0,
-  activeUsers: 0
 })
 const loading = ref({
   santris: false,
@@ -139,12 +135,12 @@ onMounted(async () => {
     <!-- Quick Actions -->
     <div class="flex flex-wrap gap-4 mb-8">
       <NuxtLink to="/admin/blogs">
-        <UButton color="primary" icon="i-heroicons-document-text" size="lg">
+        <UButton color="primary" icon="i-lucide-newspaper" size="lg">
           Kelola Blogs
         </UButton>
       </NuxtLink>
       <NuxtLink to="/admin/santris">
-        <UButton color="primary" icon="i-heroicons-users" size="lg">
+        <UButton color="primary" icon="i-lucide-users" size="lg">
           Kelola Santris
         </UButton>
       </NuxtLink>
@@ -156,7 +152,7 @@ onMounted(async () => {
       <UCard>
         <div class="flex items-center">
           <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-            <UIcon name="i-heroicons-users" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <UIcon name="i-lucide-users" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Santris</p>
@@ -169,7 +165,7 @@ onMounted(async () => {
       <UCard>
         <div class="flex items-center">
           <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-            <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-green-600 dark:text-green-400" />
+            <UIcon name="i-lucide-newspaper" class="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Blogs</p>

@@ -6,7 +6,6 @@ const limit = ref(10)
 const search = ref('')
 const sortBy = ref('newest')
 
-// Debounce search input
 const debouncedSearch = ref('')
 let searchTimeout: NodeJS.Timeout
 
@@ -21,7 +20,6 @@ watch(search, (newValue) => {
   debounceSearch(newValue)
 })
 
-// Build query parameters
 const queryParams = computed(() => {
   const params: Record<string, any> = {
     page: page.value,
@@ -56,7 +54,6 @@ watch([debouncedSearch], () => {
   page.value = 1
 })
 
-// Sort options
 const sortOptions = [
   { label: 'Terbaru', value: 'newest' },
   { label: 'Terlama', value: 'oldest' },
@@ -64,7 +61,6 @@ const sortOptions = [
   { label: 'Z-A', value: 'title_desc' }
 ]
 
-// Clear search
 const clearSearch = () => {
   search.value = ''
   debouncedSearch.value = ''
@@ -73,7 +69,6 @@ const clearSearch = () => {
 </script>
 
 <template>
-  <!-- Hero Section -->
   <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
@@ -87,7 +82,6 @@ const clearSearch = () => {
           Temukan berbagai artikel, berita, dan cerita menarik seputar dunia pondok pesantren dan kehidupan santri
         </p>
         
-        <!-- Navigation Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <UButton size="lg" to="/santri" class="text-white">
             <UIcon name="i-lucide-home" class="mr-2" />
@@ -103,9 +97,7 @@ const clearSearch = () => {
     </div>
   </section>
 
-  <!-- Content Section -->
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Results Info -->
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
@@ -122,7 +114,6 @@ const clearSearch = () => {
           </p>
         </div>
         
-        <!-- Search and Sort Controls -->
         <div class="flex items-center gap-4">
           <div class="flex-1 max-w-md">
             <UInput
@@ -149,7 +140,6 @@ const clearSearch = () => {
             size="sm"
             class="w-44"
           >
-            <!-- Icon di kiri -->
             <template #leading>
               <UIcon name="i-lucide-arrow-up-down" class="w-4 h-4 text-gray-500" />
             </template>
@@ -158,14 +148,12 @@ const clearSearch = () => {
       </div>
     </div>
 
-    <!-- Loading State -->
     <div v-if="pending" class="space-y-6">
       <div v-for="i in 3" :key="i" class="animate-pulse">
         <div class="bg-gray-200 dark:bg-gray-700 rounded-lg h-48"></div>
       </div>
     </div>
 
-    <!-- Error State -->
     <div v-else-if="error" class="text-center py-12">
       <UIcon name="i-lucide-exclamation-triangle" class="h-12 w-12 text-red-500 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -180,7 +168,6 @@ const clearSearch = () => {
       </UButton>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="blogs.length === 0" class="text-center py-12">
       <UIcon name="i-lucide-file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -198,7 +185,6 @@ const clearSearch = () => {
       </UButton>
     </div>
 
-    <!-- Blog Cards -->
     <div v-else class="space-y-6">
       <BlogCard
         v-for="(item, idx) in blogs"
@@ -214,7 +200,6 @@ const clearSearch = () => {
       />
     </div>
 
-    <!-- Pagination -->
     <div v-if="blogs.length > 0" class="mt-12 flex justify-center">
       <UPagination
         v-model="page"

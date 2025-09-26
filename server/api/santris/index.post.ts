@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      result = { data, message: 'Blog updated successfully' }
+      result = { data }
     } else {
       // Create new blog
       const { data, error } = await supabase

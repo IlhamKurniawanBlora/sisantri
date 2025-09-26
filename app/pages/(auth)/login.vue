@@ -7,11 +7,11 @@ const { login, user, initSession } = useAuth()
 definePageMeta({
   layout: 'blank',
   title: 'Login SiDawam',
-  middleware: 'guest', // ⬅️ ganti auth -> guest (biar halaman login cuma bisa diakses kalo BELUM login)
+  middleware: 'guest', 
 })
 
 useHead({
-  title: 'Login - SiDawam',
+  title: 'Login SIDawam',
   meta: [
     { name: 'description', content: 'Login to your account on SiDawam' }
   ]

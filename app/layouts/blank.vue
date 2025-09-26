@@ -5,7 +5,7 @@
         <slot />
 
         <div class="text-center mt-6">
-          <UButton to="/" variant="ghost" color="neutral" icon="i-heroicons-arrow-left">
+          <UButton to="/" variant="ghost" color="neutral" icon="i-lucide-arrow-left" >
             Kembali ke Beranda
           </UButton>
         </div>

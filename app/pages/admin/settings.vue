@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: 'admin',
-  title: 'Settings SiDawam'
+  // middleware: 'admin'
 })
 
 </script>

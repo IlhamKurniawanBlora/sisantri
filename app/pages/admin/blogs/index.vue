@@ -156,11 +156,11 @@ const columns: TableColumn<Blog>[] = [
     cell: ({ row }) => {
       const category = row.getValue('category') as string
       const colorMap = {
-        'akademik': 'blue',
-        'kegiatan': 'green',
-        'edukasi': 'purple',
-        'berita': 'yellow',
-        'pengumuman': 'red'
+        'akademik': 'primary',
+        'kegiatan': 'success',
+        'edukasi': 'secondary',
+        'berita': 'warning',
+        'pengumuman': 'error'
       } as const
       const categoryMap = {
         'akademik': 'Akademik',
@@ -175,17 +175,18 @@ const columns: TableColumn<Blog>[] = [
       }, () => categoryMap[category as keyof typeof categoryMap] || category)
     }
   },
-  {
-    accessorKey: 'profiles',
-    header: 'Penulis',
+ {
+  accessorKey: 'profiles',
+  header: 'Penulis',
     cell: ({ row }) => {
-      const profile = row.getValue('profiles') as Blog['profiles']
-      if (!profile) return h('span', {}, '-')
+      const profile = row.getValue('profiles') as Blog['profiles'] | null
+
+      const avatarSrc = profile?.avatar_url || 'https://placehold.co/32x32?text=A'
+      const name = profile?.full_name || 'Admin'
+
       return h(UUser, {
-        avatar: {
-          src: profile.avatar_url || 'https://placehold.co/32x32?text=?'
-        },
-        name: profile.full_name,
+        avatar: { src: avatarSrc },
+        name,
         description: 'Author',
         size: 'sm'
       })
@@ -372,7 +373,7 @@ const handleBlogSaved = () => {
         </p>
       </div>
       <UButton
-        icon="i-heroicons-plus"
+        icon="i-lucide-plus"
         size="sm"
         @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }"
       >
@@ -467,7 +468,7 @@ const handleBlogSaved = () => {
         <div class="flex flex-col sm:flex-row gap-2">
           <USelect
             v-model="selectedCategory"
-            :options="categoryOptions"
+            :items="categoryOptions"
             placeholder="Filter Kategori"
             class="w-full sm:w-40"
           >
@@ -478,7 +479,7 @@ const handleBlogSaved = () => {
 
           <USelect
             v-model="sortBy"
-            :options="sortOptions"
+            :items="sortOptions"
             placeholder="Urutkan"
             class="w-full sm:w-32"
           >
@@ -573,41 +574,45 @@ const handleBlogSaved = () => {
       </template>
     </USlideover>
 
-    <!-- Detail Modal -->
-    <UModal v-model="showDetailModal" :ui="{ width: 'w-full max-w-4xl' }">
-      <template #header>
-        <div class="flex items-center gap-3">
-          <UIcon name="i-lucide-file-text" class="w-6 h-6 text-primary" />
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Detail Blog
-            </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Informasi lengkap artikel blog
-            </p>
-          </div>
-        </div>
-      </template>
+   <!-- Detail Modal -->
+<UModal v-model:open="showDetailModal" class="w-full max-w-4xl">
+  <template #header>
+    <div class="flex items-center gap-3">
+      <UIcon name="i-lucide-file-text" class="w-6 h-6 text-primary" />
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Detail Blog
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Informasi lengkap artikel blog
+        </p>
+      </div>
+    </div>
+  </template>
 
-      <BlogDetailContent
-        v-if="selectedRow"
-        :blog="selectedRow"
-      />
+  <!-- Body -->
+  <template #body>
+    <BlogDetailContent
+      v-if="selectedRow"
+      :blog="selectedRow"
+    />
+  </template> 
 
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            variant="outline"
-            icon="i-lucide-external-link"
-            @click="navigateTo(`/blogs/${selectedRow?.slug}`, { external: true })"
-          >
-            Lihat di Web
-          </UButton>
-          <UButton @click="showDetailModal = false" variant="outline">
-            Tutup
-          </UButton>
-        </div>
-      </template>
-    </UModal>
+  <template #footer>
+    <div class="flex justify-end gap-2">
+      <UButton
+        variant="outline"
+        icon="i-lucide-external-link"
+        @click="navigateTo(`/blogs/${selectedRow?.slug}`, { external: true })"
+      >
+        Lihat di Web
+      </UButton>
+      <UButton @click="showDetailModal = false" variant="outline">
+        Tutup
+      </UButton>
+    </div>
+  </template>
+</UModal>
+
   </div>
 </template>

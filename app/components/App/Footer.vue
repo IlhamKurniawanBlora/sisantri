@@ -42,7 +42,7 @@
             </div>
             <div class="flex items-center space-x-2">
               <UIcon name="i-lucide-phone" class="h-4 w-4" />
-              <span>+62 813-3055-4348</span>
+              <span>+62 856-4063-3195</span>
             </div>
             <div class="flex items-center space-x-2">
               <UIcon name="i-lucide-mail" class="h-4 w-4" />
@@ -72,7 +72,7 @@
 <script setup lang="ts">
 const footerLinks = [
   { name: 'Beranda', href: '/' },
-  { name: 'Data Santri', href: '/santri' },
+  { name: 'Santri', href: '/santri' },
   { name: 'Blog', href: '/blogs' },
   { name: 'Tentang', href: '/about' }
 ]

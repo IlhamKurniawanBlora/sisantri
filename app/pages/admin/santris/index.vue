@@ -146,8 +146,8 @@ const columns: TableColumn<Santri>[] = [
     cell: ({ row }) => {
       const gender = row.getValue('gender') as string
       const genderMap = {
-        male: { label: 'Laki-laki', color: 'blue' },
-        female: { label: 'Perempuan', color: 'pink' }
+        male: { label: 'Laki-laki', color: 'primary' },
+        female: { label: 'Perempuan', color: 'neutral' }
       }
       const info = genderMap[gender as keyof typeof genderMap]
       return h(UBadge, { variant: 'subtle', color: info?.color || 'neutral' }, () => info?.label || gender)
@@ -332,7 +332,7 @@ const handleSantriSaved = () => {
         </p>
       </div>
       <UButton
-        icon="i-heroicons-plus"
+        icon="i-lucide-plus"
         size="sm"
         @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }"
       >
@@ -523,7 +523,7 @@ const handleSantriSaved = () => {
     </USlideover>
 
     <!-- Detail Modal -->
-    <UModal v-model="showDetailModal" :ui="{ width: 'w-full max-w-4xl' }">
+    <UModal v-model:open="showDetailModal" class="w-full max-w-4xl">
       <template #header>
         <div class="flex items-center gap-3">
           <UIcon name="i-lucide-user" class="w-6 h-6 text-primary" />
@@ -538,10 +538,9 @@ const handleSantriSaved = () => {
         </div>
       </template>
 
-      <SantriDetailContent
-        v-if="selectedRow"
-        :santri="selectedRow"
-      />
+      <template #body>
+        <SantriDetailContent v-if="selectedRow" :santri="selectedRow" />
+      </template>
 
       <template #footer>
         <div class="flex justify-end">
@@ -551,5 +550,6 @@ const handleSantriSaved = () => {
         </div>
       </template>
     </UModal>
+
   </div>
 </template>

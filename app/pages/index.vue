@@ -1,3 +1,56 @@
+<script setup lang="ts">
+// SEO
+useHead({
+  title: 'SiDawam',
+  meta: [
+    {
+      name: 'description',
+      content: 'Sistem informasi digital untuk pengelolaan data santri dan penyebaran berita pondok pesantren. Temukan informasi santri dan baca berita terbaru.'
+    }
+  ]
+})
+
+const features = [
+  {
+    title: 'Data Santri',
+    icon: 'i-lucide-users',
+    description: 'Kelola dan tampilkan data santri dengan profil lengkap, foto, dan informasi detail'
+  },
+  {
+    title: 'Berita & Informasi',
+    icon: 'i-lucide-newspaper',
+    description: 'Publikasikan berita dan informasi terbaru untuk santri dan masyarakat'
+  },
+  {
+    title: 'Pencarian Mudah',
+    icon: 'i-lucide-user-search',
+    description: 'Cari santri berdasarkan nama dengan fitur pencarian yang cepat dan akurat'
+  },
+  {
+    title: 'Responsif',
+    icon: 'i-lucide-smartphone',
+    description: 'Akses dari berbagai perangkat dengan tampilan yang optimal'
+  },
+  {
+    title: 'Keamanan Data',
+    icon: 'i-lucide-shield-check',
+    description: 'Data santri dan informasi tersimpan dengan aman dan terlindungi'
+  },
+  {
+    title: 'Mudah Digunakan',
+    icon: 'i-lucide-user-check',
+    description: 'Interface yang intuitif dan mudah digunakan untuk semua kalangan'
+  }
+]
+
+const stats = [
+  { value: '500+', label: 'Santri' },
+  { value: '50+', label: 'Berita' },
+  { value: '24/7', label: 'Akses Online' },
+  { value: '100%', label: 'Gratis' }
+]
+</script>
+
 <template>
   <div class="space-y-16">
     <CarouselDisplay />
@@ -71,55 +124,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-// SEO
-useHead({
-  title: 'Beranda - SiDawam',
-  meta: [
-    {
-      name: 'description',
-      content: 'Sistem informasi digital untuk pengelolaan data santri dan penyebaran berita pondok pesantren. Temukan informasi santri dan baca berita terbaru.'
-    }
-  ]
-})
-
-const features = [
-  {
-    title: 'Data Santri',
-    icon: 'i-lucide-users',
-    description: 'Kelola dan tampilkan data santri dengan profil lengkap, foto, dan informasi detail'
-  },
-  {
-    title: 'Berita & Informasi',
-    icon: 'i-lucide-newspaper',
-    description: 'Publikasikan berita dan informasi terbaru untuk santri dan masyarakat'
-  },
-  {
-    title: 'Pencarian Mudah',
-    icon: 'i-lucide-user-search',
-    description: 'Cari santri berdasarkan nama dengan fitur pencarian yang cepat dan akurat'
-  },
-  {
-    title: 'Responsif',
-    icon: 'i-lucide-smartphone',
-    description: 'Akses dari berbagai perangkat dengan tampilan yang optimal'
-  },
-  {
-    title: 'Keamanan Data',
-    icon: 'i-lucide-shield-check',
-    description: 'Data santri dan informasi tersimpan dengan aman dan terlindungi'
-  },
-  {
-    title: 'Mudah Digunakan',
-    icon: 'i-lucide-user-check',
-    description: 'Interface yang intuitif dan mudah digunakan untuk semua kalangan'
-  }
-]
-
-const stats = [
-  { value: '500+', label: 'Santri' },
-  { value: '50+', label: 'Berita' },
-  { value: '24/7', label: 'Akses Online' },
-  { value: '100%', label: 'Gratis' }
-]
-</script>

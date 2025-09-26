@@ -13,6 +13,7 @@ const props = defineProps<{
     description: string
     content?: string
     category: string
+    image_url?: string
     tags: string[]
     author_id: string
     created_at: string
@@ -29,11 +30,11 @@ const props = defineProps<{
 // Computed properties
 const categoryInfo = computed(() => {
   const colorMap = {
-    'akademik': { color: 'blue', label: 'Akademik' },
-    'kegiatan': { color: 'green', label: 'Kegiatan' },
-    'edukasi': { color: 'purple', label: 'Edukasi' },
-    'berita': { color: 'yellow', label: 'Berita' },
-    'pengumuman': { color: 'red', label: 'Pengumuman' }
+    'akademik': { color: 'primary', label: 'Akademik' },
+    'kegiatan': { color: 'success', label: 'Kegiatan' },
+    'edukasi': { color: 'secondary', label: 'Edukasi' },
+    'berita': { color: 'warning', label: 'Berita' },
+    'pengumuman': { color: 'error', label: 'Pengumuman' }
   }
   
   return colorMap[props.blog.category as keyof typeof colorMap] || { color: 'neutral', label: props.blog.category }
@@ -89,6 +90,20 @@ const formatContent = (content: string, maxLength: number = 500) => {
           </div>
         </div>
       </div>
+    </UCard>
+
+    <UCard v-if="blog.image_url">
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-image" class="w-5 h-5" />
+          <h4 class="font-semibold">Gambar Utama</h4>
+        </div>
+      </template>
+      <img 
+        :src="blog.image_url" 
+        :alt="blog.title" 
+        class="w-full h-auto rounded-lg object-cover"
+      />
     </UCard>
 
     <!-- Author Information -->

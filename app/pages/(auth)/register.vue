@@ -6,7 +6,6 @@ const { register, initSession } = useAuth()
 
 definePageMeta({
   layout: 'blank',
-  title: 'Registrasi SiDawam',
   middleware: 'guest',
 })
 
