@@ -304,7 +304,6 @@ function getRowItems(row: Row<Blog>) {
   return items
 }
 
-// CRUD operations
 async function deleteBlog(slug: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus blog ini?')) return
   try {
@@ -335,7 +334,7 @@ const stats = computed(() => {
     total: total.value,
     published: published,
     categories: categories.length,
-    totalViews: 0 // implementasi jika ada views
+    totalViews: 0 
   }
 })
 

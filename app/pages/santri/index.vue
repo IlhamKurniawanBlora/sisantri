@@ -2,10 +2,9 @@
 import { ref, computed, watch } from 'vue'
 
 const page = ref(1)
-const limit = ref(12) // Increased limit for better grid layout
+const limit = ref(8) // Increased limit for better grid layout
 const search = ref('')
 
-// Debounce search input
 const debouncedSearch = ref('')
 let searchTimeout: NodeJS.Timeout
 
@@ -20,7 +19,6 @@ watch(search, (newValue) => {
   debounceSearch(newValue)
 })
 
-// Build query parameters
 const queryParams = computed(() => {
   const params: Record<string, any> = {
     page: page.value,
@@ -49,17 +47,16 @@ const { data: res, pending, error, refresh } = await useAsyncData(
 const santris = computed(() => res.value?.data ?? [])
 const total = computed(() => res.value?.pagination?.total ?? 0)
 
-// Reset page when search changes
 watch([debouncedSearch], () => {
   page.value = 1
 })
 
-// Clear all filters
 const clearFilters = () => {
   search.value = ''
   debouncedSearch.value = ''
   page.value = 1
 }
+
 </script>
 
 <template>
@@ -79,13 +76,13 @@ const clearFilters = () => {
         
         <!-- Navigation Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-          <UButton size="lg" to="/santri" class="text-white">
+          <UButton size="lg" to="/" class="text-white">
             <UIcon name="i-lucide-home" class="mr-2" />
-            Beranda Santri
+            Beranda
           </UButton>
           <UButton size="lg" variant="outline" to="/blogs">
             <UIcon name="i-lucide-newspaper" class="mr-2" />
-            Lihat Blog Santri
+            Lihat Artikel
           </UButton>
         </div>
       </div>
@@ -111,15 +108,13 @@ const clearFilters = () => {
           </p>
         </div>
         
-        <div class="hidden md:flex items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
           <div class="flex-1">
             <UInput
               v-model="search"
               placeholder="Cari santri berdasarkan nama..."
               size="lg"
               :loading="pending"
-              :trailing-icon="search ? 'i-lucide-x' : 'i-lucide-user-search'"
-              @click:trailing="search ? search = '' : null"
               class="w-full min-w-80"
             >
               <template #leading>
@@ -127,25 +122,47 @@ const clearFilters = () => {
               </template>
             </UInput>
           </div>
+          
+          <UButton
+            v-if="search"
+            variant="subtle"
+            color="error"
+            size="lg"
+            @click="clearFilters"
+            class="shrink-0"
+          >
+            <UIcon name="i-lucide-x" class="h-5 w-5" />
+          </UButton>
         </div>
+
       </div>
 
       <!-- Mobile Search -->
-      <div class="md:hidden mt-4">
+      <div class="md:hidden mt-4 flex items-center gap-2">
         <UInput
           v-model="search"
           placeholder="Cari santri berdasarkan nama..."
           size="lg"
           :loading="pending"
-          :trailing-icon="search ? 'i-lucide-x' : 'i-lucide-user-search'"
-          @click:trailing="search ? search = '' : null"
           class="w-full"
         >
           <template #leading>
-            <UIcon name="i-lucide-user-search" class="h-5 w-5 text-gray-400" />
+            <UIcon name="i-lucide-users" class="h-5 w-5 text-gray-400" />
           </template>
         </UInput>
+
+        <UButton
+          v-if="search"
+          variant="subtle"
+          color="error"
+          size="lg"
+          @click="clearFilters"
+          class="shrink-0"
+        >
+          <UIcon name="i-lucide-x" class="h-5 w-5" />
+        </UButton>
       </div>
+
     </div>
 
     <!-- Loading State -->

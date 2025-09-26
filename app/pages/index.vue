@@ -108,7 +108,7 @@ const stats = [
             class="text-white w-full sm:w-auto px-8 py-3 sm:px-6 sm:py-2"
             >
             <UIcon name="i-lucide-user-search" class="mr-2 h-5 w-5" />
-            Cari Santri
+            Lihat Data Santri
             </UButton>
           <UButton 
             size="lg" 

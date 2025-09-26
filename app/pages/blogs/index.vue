@@ -85,7 +85,7 @@ const clearSearch = () => {
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <UButton size="lg" to="/santri" class="text-white">
             <UIcon name="i-lucide-home" class="mr-2" />
-            Beranda Santri
+            Beranda
           </UButton>
           <UButton size="lg" variant="outline" to="/santri">
             <UIcon name="i-lucide-users" class="mr-2" />
@@ -93,60 +93,73 @@ const clearSearch = () => {
           </UButton>
         </div>
       </div>
-
     </div>
   </section>
 
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ search ? 'Hasil Pencarian' : 'Artikel Terbaru' }}
-          </h2>
-          <p class="text-gray-600 dark:text-gray-300 mt-1">
-            <template v-if="pending">
-              Sedang memuat...
-            </template>
-            <template v-else>
-              {{ total }} artikel ditemukan
-            </template>
-          </p>
-        </div>
-        
-        <div class="flex items-center gap-4">
-          <div class="flex-1 max-w-md">
-            <UInput
-              v-model="search"
-              placeholder="Cari artikel, judul, atau konten..."
-              size="lg"
-              :loading="pending"
-              :trailing-icon="search ? 'i-lucide-x' : 'i-lucide-search'"
-              @click:trailing="search ? clearSearch() : null"
-              class="w-full"
-            >
-              <template #leading>
-                <UIcon name="i-lucide-newspaper" class="h-5 w-5 text-gray-400" />
-              </template>
-            </UInput>
-          </div>
-
-          <USelect
-            v-model="sortBy"
-            :items="sortOptions"
-            option-attribute="label"
-            value-attribute="value"
-            placeholder="Urutkan"
-            size="sm"
-            class="w-44"
-          >
-            <template #leading>
-              <UIcon name="i-lucide-arrow-up-down" class="w-4 h-4 text-gray-500" />
-            </template>
-          </USelect>
-        </div>
-      </div>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Judul + info artikel -->
+    <div>
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
+        {{ search ? 'Hasil Pencarian' : 'Artikel Terbaru' }}
+      </h2>
+      <p class="text-gray-600 dark:text-gray-300 mt-1">
+        <template v-if="pending">
+          Sedang memuat...
+        </template>
+        <template v-else>
+          {{ total }} artikel ditemukan
+        </template>
+      </p>
     </div>
+
+    <!-- Search + Sort -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 w-full sm:w-auto">
+      <!-- Search + Reset -->
+      <div class="flex items-center gap-2 w-full sm:max-w-md">
+        <UInput
+          v-model="search"
+          placeholder="Cari artikel, judul, atau konten..."
+          size="lg"
+          :loading="pending"
+          class="flex-1"
+        >
+          <template #leading>
+            <UIcon name="i-lucide-newspaper" class="h-5 w-5 text-gray-400" />
+          </template>
+        </UInput>
+
+        <UButton
+          v-if="search"
+          variant="subtle"
+          color="error"
+          size="sm"
+          @click="clearSearch"
+          class="shrink-0"
+        >
+          <UIcon name="i-lucide-x" class="h-4 w-4" />
+        </UButton>
+      </div>
+
+      <!-- Sort -->
+      <USelect
+        v-model="sortBy"
+        :items="sortOptions"
+        option-attribute="label"
+        value-attribute="value"
+        placeholder="Urutkan"
+        size="lg"
+        class="w-full sm:w-44"
+      >
+        <template #leading>
+          <UIcon name="i-lucide-arrow-up-down" class="w-4 h-4 text-gray-500" />
+        </template>
+      </USelect>
+    </div>
+  </div>
+</div>
+
 
     <div v-if="pending" class="space-y-6">
       <div v-for="i in 3" :key="i" class="animate-pulse">
