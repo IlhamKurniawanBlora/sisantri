@@ -147,11 +147,7 @@ const userMenuItems = [
             @click="sidebarOpen = true"
           />
           <div class="flex-1 max-w-md mx-4">
-            <UInput
-              icon="i-lucide-search"
-              placeholder="Search..."
-              class="w-full"
-            />
+            
           </div>
 
           <div class="flex items-center space-x-3 mx-3">

@@ -92,10 +92,10 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       icon="i-lucide-lock"
       @submit="onSubmit"
     >
-      <template #description>
+      <!-- <template #description>
         Don't have an account?
         <ULink to="/register" class="text-primary font-medium">Sign up</ULink>.
-      </template>
+      </template> -->
       <template #footer>
         By signing in, you agree to our
         <ULink to="#" class="text-primary font-medium">Terms of Service</ULink>.

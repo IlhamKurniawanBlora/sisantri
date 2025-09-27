@@ -31,11 +31,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const supabase = await serverSupabase()
-    let imageUrl = body.image_url || ''
+    let imageUrl: string | null = null
 
     // --- Upload file ke bucket ---
     if (fileBuffer && fileName) {
-      // kalau ada id, simpan di folder id
       const ext = fileName.split('.').pop()
       const safeName = body.full_name
         ?.toLowerCase()
@@ -65,37 +64,60 @@ export default defineEventHandler(async (event) => {
 
     // --- Update data ---
     if (body.id) {
+      // ambil data lama dulu
+      const { data: existing, error: existingError } = await supabase
+        .from('santris')
+        .select('image_url')
+        .eq('id', body.id)
+        .single()
+
+      if (existingError) {
+        throw createError({ statusCode: 404, statusMessage: 'Santri not found' })
+      }
+
+      const updateData: any = {
+        nis: body.nis,
+        full_name: body.full_name,
+        address: body.address,
+        gender: body.gender,
+        updated_at: new Date().toISOString()
+      }
+
+      // atur image_url
+      if (imageUrl) {
+        updateData.image_url = imageUrl
+      } else if (body.image_url) {
+        updateData.image_url = body.image_url
+      } else {
+        updateData.image_url = existing.image_url
+      }
+
       const { data, error } = await supabase
         .from('santris')
-        .update({
-          nis: body.nis,
-          full_name: body.full_name,
-          address: body.address,
-          gender: body.gender,
-          image_url: imageUrl || null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', body.id)
         .select('*')
         .single()
 
       if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
-      return { success: true, data }
+      return { success: true, data, message: 'Santri updated successfully' }
     }
 
     // --- Create data baru ---
+    const insertData: any = {
+      nis: body.nis,
+      full_name: body.full_name,
+      address: body.address,
+      gender: body.gender,
+      image_url: imageUrl || body.image_url || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
     const { data, error } = await supabase
       .from('santris')
-      .insert({
-        nis: body.nis,
-        full_name: body.full_name,
-        address: body.address,
-        gender: body.gender,
-        image_url: imageUrl,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .insert(insertData)
       .select('*')
       .single()
 

@@ -155,13 +155,11 @@ async function handleSubmit() {
     formData.append('category', formState.category)
     formData.append('tags', JSON.stringify(formState.tags))
 
-    // Hanya kirim file jika ada file baru
     if (formState.file) {
       formData.append('file', formState.file)
-    } else if (formState.image_url) {
-      // Kirim image_url jika tidak ada file baru
-      formData.append('image_url', formState.image_url)
     }
+    formData.append('image_url', formState.image_url || '')
+
 
     let url = '/api/blogs'
     let method = 'POST'
@@ -323,7 +321,7 @@ onBeforeUnmount(() => {
     </UFormField>
 
     <!-- Form Actions -->
-    <div class="flex justify-end gap-3 pt-6 border-t w-full">
+    <div class="flex justify-end gap-3 pt-6 w-full">
       <UButton 
         variant="outline" 
         @click="emit('close')"

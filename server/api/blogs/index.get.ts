@@ -2,13 +2,13 @@
 import { serverSupabase } from '../../utils/supabase'
 
 interface BlogQuery {
-  page?: number
-  limit?: number
+  page?: number | string
+  limit?: number | string
   search?: string
   category?: string
   tags?: string
   author_id?: string
-  includeDeleted?: boolean
+  includeDeleted?: boolean | string | number
   sortBy?: 'newest' | 'oldest' | 'title_asc' | 'title_desc'
 }
 
@@ -17,16 +17,22 @@ export default defineEventHandler(async (event) => {
     const supabase = serverSupabase()
     const query = getQuery(event) as BlogQuery
 
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      category,
-      tags,
-      author_id,
-      includeDeleted = false,
-      sortBy = 'newest'
-    } = query
+    // Normalisasi query
+    const page = Number(query.page) || 1
+    const limit = Number(query.limit) || 10
+    const search = query.search
+    const category = query.category
+    const tags = query.tags
+    const author_id = query.author_id
+    const sortBy = query.sortBy || 'newest'
+
+    // Pastikan includeDeleted -> boolean
+    const includeDeleted = (
+      query.includeDeleted === true ||
+      query.includeDeleted === 'true' ||
+      query.includeDeleted === 1 ||
+      query.includeDeleted === '1'
+    )
 
     let supabaseQuery = supabase
       .from('blogs')
@@ -42,24 +48,24 @@ export default defineEventHandler(async (event) => {
         { count: 'exact' }
       )
 
-    // Filter non-deleted records by default
+    // Filter non-deleted secara default
     if (!includeDeleted) {
       supabaseQuery = supabaseQuery.is('deleted_at', null)
     }
 
-    // Search functionality
+    // Search
     if (search) {
       supabaseQuery = supabaseQuery.or(
         `title.ilike.%${search}%,description.ilike.%${search}%,content.ilike.%${search}%`
       )
     }
 
-    // Category filter
+    // Category
     if (category) {
       supabaseQuery = supabaseQuery.eq('category', category)
     }
 
-    // Tags filter
+    // Tags (array overlaps)
     if (tags) {
       const tagArray = tags.split(',').map((tag) => tag.trim())
       supabaseQuery = supabaseQuery.overlaps('tags', tagArray)
@@ -71,8 +77,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // Pagination
-    const from = (Number(page) - 1) * Number(limit)
-    const to = from + Number(limit) - 1
+    const from = (page - 1) * limit
+    const to = from + limit - 1
     supabaseQuery = supabaseQuery.range(from, to)
 
     // Sorting
@@ -105,10 +111,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       data: data || [],
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / Number(limit))
+        totalPages: Math.ceil((count || 0) / limit)
       },
       filters: {
         search: search || null,

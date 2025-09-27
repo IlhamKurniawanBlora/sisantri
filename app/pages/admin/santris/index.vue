@@ -60,6 +60,12 @@ const selectedRow = ref<Santri | null>(null)
 // Modal states
 const showDetailModal = ref(false)
 const showConfirmDialog = ref(false)
+const confirmOptions = ref<{
+  title: string
+  description: string
+  variant: 'danger' | 'info'
+  action?: () => void
+} | null>(null)
 
 // Debounced search
 const debouncedSearch = ref('')
@@ -162,16 +168,15 @@ const columns: TableColumn<Santri>[] = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      const deletedAt = row.original.deleted_at
-      const status = deletedAt ? 'inactive' : (row.original.status || 'active')
-      const statusMap = {
-        active: { label: 'Aktif', color: 'success' },
-        inactive: { label: 'Tidak Aktif', color: 'neutral' },
-        graduated: { label: 'Lulus', color: 'blue' },
-        dropped_out: { label: 'Keluar', color: 'orange' }
-      }
-      const info = statusMap[status as keyof typeof statusMap]
-      return h(UBadge, { variant: 'subtle', color: info?.color || 'neutral' }, () => info?.label || status)
+      const isDeleted = !!row.original.deleted_at
+      return h(
+        UBadge,
+        {
+          variant: 'subtle',
+          color: isDeleted ? 'error' : 'success'
+        },
+        () => (isDeleted ? 'Tidak Aktif' : 'Aktif')
+      )
     }
   },
   {
@@ -223,7 +228,7 @@ function getRowItems(row: Row<Santri>) {
       icon: 'i-lucide-copy',
       onSelect() {
         copy(santri.nis)
-        toast.add({ title: 'NIS copied!', color: 'success', icon: 'i-lucide-check' })
+        toast.add({ title: 'NIS disalin!', color: 'success', icon: 'i-lucide-check' })
       }
     },
     { type: 'separator' },
@@ -251,13 +256,29 @@ function getRowItems(row: Row<Santri>) {
       label: 'Delete',
       icon: 'i-lucide-trash',
       class: 'text-red-500',
-      onSelect: () => deleteSantri(santri.id)
+      onSelect: () => {
+        confirmOptions.value = {
+          title: 'Hapus Santri',
+          description: `Apakah kamu yakin ingin menghapus santri ${santri.full_name}?`,
+          variant: 'danger',
+          action: () => deleteSantri(santri.id)
+        }
+        showConfirmDialog.value = true
+      }
     })
   } else {
     items.push({
       label: 'Restore',
       icon: 'i-lucide-undo-2',
-      onSelect: () => restoreSantri(santri.id)
+      onSelect: () => {
+        confirmOptions.value = {
+          title: 'Pulihkan Santri',
+          description: `Apakah kamu yakin ingin memulihkan santri ${santri.full_name}?`,
+          variant: 'info',
+          action: () => restoreSantri(santri.id)
+        }
+        showConfirmDialog.value = true
+      }
     })
   }
 
@@ -268,20 +289,20 @@ function getRowItems(row: Row<Santri>) {
 async function deleteSantri(id: string) {
   try {
     await $fetch(`/api/santris/${id}`, { method: 'DELETE' })
-    toast.add({ title: 'Santri deleted!', color: 'success', icon: 'i-lucide-trash' })
+    toast.add({ title: 'Santri dihapus!', color: 'success', icon: 'i-lucide-trash' })
     fetchSantris()
   } catch (error) {
-    toast.add({ title: 'Failed to delete santri', color: 'error' })
+    toast.add({ title: 'Gagal menghapus santri', color: 'error' })
   }
 }
 
 async function restoreSantri(id: string) {
   try {
     await $fetch(`/api/santris/${id}/restore`, { method: 'POST' })
-    toast.add({ title: 'Santri restored!', color: 'success', icon: 'i-lucide-undo-2' })
+    toast.add({ title: 'Santri dipulihkan!', color: 'success', icon: 'i-lucide-undo-2' })
     fetchSantris()
   } catch (error) {
-    toast.add({ title: 'Failed to restore santri', color: 'error' })
+    toast.add({ title: 'Gagal memulihkan santri', color: 'error' })
   }
 }
 
@@ -312,11 +333,12 @@ const handleSantriSaved = () => {
   showSlideover.value = false
   fetchSantris()
   toast.add({
-    title: mode.value === 'add' ? 'Santri added successfully!' : 'Santri updated successfully!',
+    title: mode.value === 'add' ? 'Santri berhasil ditambahkan!' : 'Santri berhasil diperbarui!',
     color: 'success'
   })
 }
 </script>
+
 
 <template>
   <div>
@@ -427,7 +449,7 @@ const handleSantriSaved = () => {
         <div class="flex flex-col sm:flex-row gap-2">
           <USelect
             v-model="selectedGender"
-            :options="genderOptions"
+            :items="genderOptions"
             placeholder="Filter Gender"
             class="w-full sm:w-40"
           >
@@ -551,5 +573,17 @@ const handleSantriSaved = () => {
       </template>
     </UModal>
 
+        <AdminConfirmDialog
+      v-if="showConfirmDialog"
+      :title="confirmOptions?.title"
+      :description="confirmOptions?.description"
+      :variant="confirmOptions?.variant"
+      confirm-text="Ya"
+      cancel-text="Batal"
+      @close="(confirmed) => {
+        showConfirmDialog = false
+        if (confirmed && confirmOptions?.action) confirmOptions.action()
+      }"
+    />
   </div>
 </template>

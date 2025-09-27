@@ -97,7 +97,7 @@ const hasActiveFilters = computed(() => {
         <!-- Category Filter -->
         <USelect
           v-model="categoryModel"
-          :options="categoryOptions"
+          :items="categoryOptions"
           placeholder="Kategori"
           class="w-full sm:w-44"
           size="lg"
@@ -110,7 +110,7 @@ const hasActiveFilters = computed(() => {
         <!-- Sort Filter -->
         <USelect
           v-model="sortModel"
-          :options="sortOptions"
+          :items="sortOptions"
           placeholder="Urutkan"
           class="w-full sm:w-36"
           size="lg"

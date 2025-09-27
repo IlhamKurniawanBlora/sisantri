@@ -1,5 +1,5 @@
-// server/api/santris/[id].delete.ts
-import { serverSupabase } from '../../utils/supabase'
+// server/api/santris/[id]/restore.post.ts
+import { serverSupabase } from '../../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -15,17 +15,17 @@ export default defineEventHandler(async (event) => {
 
     const { error } = await supabase
       .from('santris')
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: null })
       .eq('id', id)
 
     if (error) {
       throw createError({
         statusCode: 400,
-        statusMessage: `Gagal menghapus santri: ${error.message}`
+        statusMessage: `Gagal merestore santri: ${error.message}`
       })
     }
 
-    return { success: true, message: 'Santri berhasil dihapus (soft delete)' }
+    return { success: true, message: 'Santri berhasil direstore' }
   } catch (error: any) {
     throw createError({
       statusCode: error.statusCode || 500,

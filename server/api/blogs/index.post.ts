@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     let fileName: string | null = null
     let fileType: string | null = null
 
+    // --- Parse body & file ---
     if (contentType.includes('multipart/form-data')) {
       const formData = await readMultipartFormData(event)
       if (!formData) {
@@ -36,24 +37,28 @@ export default defineEventHandler(async (event) => {
     }
 
     const supabase = await serverSupabase()
+
+    // --- Buat slug aman ---
     const slug = body.slug?.toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '')
+      .replace(/^-+|-+$/g, '') || 'blog'
 
-    let imageUrl = body.image_url || ''
+    let imageUrl: string | null = null
 
-    // Upload file jika ada
+    // --- Upload file ke bucket ---
     if (fileBuffer && fileName) {
       const ext = fileName.split('.').pop()
+      const folderId = body.id || `temp-${Date.now()}`
       const newFileName = `${Date.now()}-${slug}.${ext}`
+      const filePath = `${folderId}/${newFileName}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('blogs')
-        .upload(newFileName, fileBuffer, {
+        .upload(filePath, fileBuffer, {
           contentType: fileType || 'image/jpeg',
-          upsert: false
+          upsert: true
         })
 
       if (uploadError) {
@@ -64,41 +69,66 @@ export default defineEventHandler(async (event) => {
       imageUrl = data.publicUrl
     }
 
-    // Update
+    // --- Update data ---
     if (body.id) {
-      const { data, error } = await supabase
+      // ambil data lama
+      const { data: existing, error: existingError } = await supabase
         .from('blogs')
-        .update({
-          slug,
-          title: body.title,
-          description: body.description,
-          content: body.content,
-          category: body.category || 'akademik',
-          tags: Array.isArray(body.tags) ? body.tags : [],
-          image_url: imageUrl || null,
-          updated_at: new Date().toISOString()
-        })
+        .select('image_url')
         .eq('id', body.id)
-        .select('*')
         .single()
 
-      if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+      if (existingError) {
+        throw createError({ statusCode: 404, statusMessage: 'Blog not found' })
+      }
 
-      return { success: true, data }
-    }
-
-    // Create
-    const { data, error } = await supabase
-      .from('blogs')
-      .insert({
+      const updateData: any = {
         slug,
         title: body.title,
         description: body.description,
         content: body.content,
         category: body.category || 'akademik',
         tags: Array.isArray(body.tags) ? body.tags : [],
-        image_url: imageUrl
-      })
+        updated_at: new Date().toISOString()
+      }
+
+      // atur image_url
+      if (imageUrl) {
+        updateData.image_url = imageUrl
+      } else if (body.image_url) {
+        updateData.image_url = body.image_url
+      } else {
+        updateData.image_url = existing.image_url
+      }
+
+      const { data, error } = await supabase
+        .from('blogs')
+        .update(updateData)
+        .eq('id', body.id)
+        .select('*')
+        .single()
+
+      if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+
+      return { success: true, data, message: 'Blog updated successfully' }
+    }
+
+    // --- Create data baru ---
+    const insertData: any = {
+      slug,
+      title: body.title,
+      description: body.description,
+      content: body.content,
+      category: body.category || 'akademik',
+      tags: Array.isArray(body.tags) ? body.tags : [],
+      image_url: imageUrl || body.image_url || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    const { data, error } = await supabase
+      .from('blogs')
+      .insert(insertData)
       .select('*')
       .single()
 

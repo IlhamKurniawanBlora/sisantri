@@ -234,7 +234,7 @@ function handleFileChange(e: Event) {
       <template #body>
         <UForm @submit.prevent="mode === 'add' ? handleAdd() : handleEdit()">
           <UFormField label="Upload Gambar" name="file">
-            <UInput type="file" accept="image/*" @change="handleFileChange" />
+            <UInput type="file" accept="image/*" @change="handleFileChange" class="w-full"/>
           </UFormField>
           <div v-if="formState.previewUrl" class="mt-4">
             <p class="text-sm mb-2">Preview:</p>
