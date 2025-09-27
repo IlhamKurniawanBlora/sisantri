@@ -88,7 +88,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
     <UAuthForm
       :schema="schema"
       :fields="fields"
-      title="Welcome back!"
+      title="Selamat datang di SIDAWAM"
       icon="i-lucide-lock"
       @submit="onSubmit"
     >
@@ -97,8 +97,8 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         <ULink to="/register" class="text-primary font-medium">Sign up</ULink>.
       </template> -->
       <template #footer>
-        By signing in, you agree to our
-        <ULink to="#" class="text-primary font-medium">Terms of Service</ULink>.
+        Kembali ke
+        <ULink to="/" class="text-primary font-medium">Beranda</ULink>.
       </template>
     </UAuthForm>
   </div>

@@ -7,16 +7,16 @@
     <NuxtRouteAnnouncer />
 
     <!-- Global Layout -->
+    <UMain>
     <NuxtLayout>
-      <UMain>
         <Transition name="page" mode="out-in" appear>
           <!-- Bungkus NuxtPage dengan elemen tunggal -->
           <div class="page-wrapper">
             <NuxtPage />
           </div>
         </Transition>
-      </UMain>
-    </NuxtLayout>
+      </NuxtLayout>
+    </UMain>
   </UApp>
 </template>
 
