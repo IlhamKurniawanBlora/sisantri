@@ -5,18 +5,55 @@
 <template>
   <div class="space-y-16">
     <!-- Hero Section -->
-    <section class="text-center py-16">
+    <!-- <section class="text-center py-16">
       <div class="max-w-4xl mx-auto">
         <UIcon name="i-lucide-users" class="h-16 w-16 text-primary-600 mx-auto mb-6" />
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-          Tentang SiDawam
+          Tentang <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
           Sistem Informasi Digital untuk Pondok Pesantren Dawam - 
           Menghubungkan tradisi dengan teknologi modern dalam pengelolaan data santri dan informasi pesantren.
         </p>
       </div>
-    </section>
+    </section> -->
+
+    <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
+           <img
+              src="/logo.png"
+              alt="SiDawam Logo"
+              class="w-10 h-auto sm:w-12 md:w-16 flex-shrink-0"
+            />
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Tentang <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+          Sistem Informasi Digital untuk Pondok Pesantren Dawam - 
+          Menghubungkan tradisi dengan teknologi modern dalam pengelolaan data santri dan informasi pesantren.
+        
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <UButton size="lg" to="/santri" class="text-white">
+            <UIcon name="i-lucide-home" class="mr-2" />
+            Beranda
+          </UButton>
+          <UButton size="lg" variant="outline" to="/santri">
+            <UIcon name="i-lucide-users" class="mr-2" />
+            Lihat Data Santri
+          </UButton>
+          <UButton size="lg" variant="outline" to="/blogs">
+            <UIcon name="i-lucide-newspaper" class="mr-2" />
+            Baca Berita
+          </UButton>
+        </div>
+      </div>
+    </div>
+  </section>
 
     <!-- What is SiDawam -->
     <section class="py-16">
@@ -24,7 +61,7 @@
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              Apa itu SiDawam?
+              Apa itu <span class="text-primary-600 dark:text-primary-400">SiDawam</span>?
             </h2>
             <div class="space-y-4 text-gray-600 dark:text-gray-300">
               <p>
@@ -73,7 +110,7 @@
       <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Pondok Pesantren Dawam
+            Pondok Pesantren <span class="text-primary-600 dark:text-primary-400">Dawam</span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300">
             Lembaga pendidikan Islam yang mengakar dalam tradisi dan berinovasi dengan teknologi
@@ -228,7 +265,7 @@
     <section class="py-16 text-center">
       <div class="max-w-3xl mx-auto space-y-6">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-          Jelajahi Informasi Pesantren
+          Jelajahi Informasi <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300">
           Temukan informasi lengkap tentang santri dan berita terbaru dari Pondok Pesantren Dawam melalui platform SiDawam.

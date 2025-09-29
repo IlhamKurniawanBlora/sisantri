@@ -604,8 +604,8 @@ const handleBlogSaved = () => {
       </template>
     </UCard>
 
-    <!-- Slideover Form -->
-    <USlideover v-if="showSlideover" :title="mode === 'add' ? 'Tambah Blog' : 'Edit Blog'">
+      <!-- Slideover Form -->
+    <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Blog' : 'Edit Blog'">
       <template #body>
         <BlogFormContent
           :mode="mode"
@@ -616,7 +616,6 @@ const handleBlogSaved = () => {
       </template>
     </USlideover>
 
-   <!-- Detail Modal -->
   <UModal v-model:open="showDetailModal" class="w-full max-w-4xl">
     <template #header>
       <div class="flex items-center gap-3">
@@ -668,7 +667,5 @@ const handleBlogSaved = () => {
         if (confirmed && confirmOptions?.action) confirmOptions.action()
       }"
     />
-
-
   </div>
 </template>

@@ -96,7 +96,7 @@ const stats = [
     <section class="py-16 text-center">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-          Mulai Jelajahi SiDawam
+          Mulai Jelajahi <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
           Temukan informasi santri dan berita terbaru dari pondok pesantren
@@ -116,6 +116,7 @@ const stats = [
             to="/about"
             class="w-full sm:w-auto px-8 py-3 sm:px-6 sm:py-2"
           >
+            <UIcon name="i-lucide-info" class="mr-2 h-5 w-5" />
             Pelajari Lebih Lanjut
           </UButton>
         </div>

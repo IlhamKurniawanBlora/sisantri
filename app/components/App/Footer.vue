@@ -4,10 +4,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Brand -->
         <div class="space-y-4">
-          <div class="flex items-center space-x-2">
-            <UIcon name="i-lucide-users" class="h-6 w-6 text-primary-600" />
-            <span class="text-lg font-bold text-gray-900 dark:text-white">SiDawam</span>
-          </div>
+          <AppLogo />
           <p class="text-sm text-gray-600 dark:text-gray-400">
             Sistem informasi digital untuk pengelolaan data santri dan berita pondok pesantren.
           </p>
@@ -37,15 +34,18 @@
           </h3>
           <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <div class="flex items-center space-x-2">
-              <UIcon name="i-lucide-map-pin" class="h-4 w-4" />
-              <span>Malangan UH VII/512 A, RT 039 RW 013 Kel. Giwangan, Kec. Umbulharjo, Kota Yogyakarta. 55163</span>
+              <UIcon name="i-lucide-map-pin" class="w-5 h-5 flex-shrink-0" />
+              <span>
+                Malangan UH VII/512 A, RT 039 RW 013 Kel. Giwangan, Kec. Umbulharjo,
+                Kota Yogyakarta. 55163
+              </span>
             </div>
             <div class="flex items-center space-x-2">
-              <UIcon name="i-lucide-phone" class="h-4 w-4" />
+              <UIcon name="i-lucide-phone" class="w-5 h-5 flex-shrink-0" />
               <span>+62 856-4063-3195</span>
             </div>
             <div class="flex items-center space-x-2">
-              <UIcon name="i-lucide-mail" class="h-4 w-4" />
+              <UIcon name="i-lucide-mail" class="w-5 h-5 flex-shrink-0" />
               <span>info@SiDawam.id</span>
             </div>
           </div>

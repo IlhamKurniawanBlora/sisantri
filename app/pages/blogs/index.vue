@@ -73,7 +73,7 @@ const clearSearch = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
-          <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
+          <UIcon name="i-lucide-newspaper" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Blog <span class="text-primary-600 dark:text-primary-400">SiDawam</span>

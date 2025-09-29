@@ -76,10 +76,7 @@ const userMenuItems = [
       ]"
     >
       <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
-        <div class="flex items-center space-x-2">
-          <UIcon name="i-lucide-users" class="w-8 h-8 text-primary-500" />
-          <span class="text-xl font-bold text-gray-900 dark:text-white">Admin SiDawam</span>
-        </div>
+        <AppLogo />
         <UButton
           variant="ghost"
           size="sm"
