@@ -6,10 +6,10 @@ const { user, logout } = useAuth()
 const toast = useToast()
 
 const items = computed<NavigationMenuItem[]>(() => [
-  { label: 'Home', to: '/', icon: 'i-lucide-home', active: route.path === '/' },
+  { label: 'Beranda', to: '/', icon: 'i-lucide-home', active: route.path === '/' },
   { label: 'Santri', to: '/santri', icon: 'i-lucide-users', active: route.path.startsWith('/santri') },
-  { label: 'Blog', to: '/blogs', icon: 'i-lucide-newspaper', active: route.path.startsWith('/blogs') },
-  { label: 'About', to: '/about', icon: 'i-lucide-info', active: route.path === '/about' }
+  { label: 'Berita', to: '/blogs', icon: 'i-lucide-newspaper', active: route.path.startsWith('/blogs') },
+  { label: 'Tentang', to: '/about', icon: 'i-lucide-info', active: route.path === '/about' }
 ])
 
 const showLogoutDialog = ref(false)

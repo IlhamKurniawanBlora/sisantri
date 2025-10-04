@@ -22,10 +22,10 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
           <UIcon name="i-lucide-newspaper" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
         </div>
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Blog <span class="text-primary-600 dark:text-primary-400">Terbaru</span>
+          Berita <span class="text-primary-600 dark:text-primary-400">Terbaru</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Baca artikel dan cerita menarik seputar kehidupan santri dan pesantren
+          Baca berita dan cerita menarik seputar kehidupan santri dan pesantren
         </p>
       </div>
 
@@ -40,10 +40,10 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
       <div v-else-if="error" class="text-center py-12">
         <UIcon name="i-lucide-usersexclamation-triangle" class="h-8 w-8 text-red-500 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Gagal Memuat Artikel
+          Gagal Memuat Berita
         </h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-          Terjadi kesalahan saat memuat artikel blog
+          Terjadi kesalahan saat memuat berita blog
         </p>
         <UButton @click="refresh" variant="outline" size="sm">
           <UIcon name="i-lucide-usersarrow-path" class="mr-2" />
@@ -55,10 +55,10 @@ const total = computed(() => res.value?.pagination?.total ?? 0)
       <div v-else-if="blogs.length === 0" class="text-center py-12">
         <UIcon name="i-lucide-usersdocument-text" class="h-8 w-8 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Belum Ada Artikel
+          Belum Ada Berita
         </h3>
         <p class="text-gray-600 dark:text-gray-300">
-          Belum ada artikel blog yang dipublikasikan
+          Belum ada berita yang dipublikasikan
         </p>
       </div>
 

@@ -251,37 +251,48 @@ function getRowItems(row: Row<Santri>) {
     }
   ]
 
-  if (!santri.deleted_at) {
-    items.push({
-      label: 'Delete',
-      icon: 'i-lucide-trash',
-      class: 'text-red-500',
-      onSelect: () => {
-        confirmOptions.value = {
-          title: 'Hapus Santri',
-          description: `Apakah kamu yakin ingin menghapus santri ${santri.full_name}?`,
-          variant: 'danger',
-          action: () => deleteSantri(santri.id)
-        }
-        showConfirmDialog.value = true
+if (!santri.deleted_at) {
+  items.push({
+    label: 'Delete',
+    icon: 'i-lucide-trash',
+    onSelect: () => {
+      confirmOptions.value = {
+        title: 'Hapus Santri',
+        description: `Apakah kamu yakin ingin menghapus santri ${santri.full_name}?`,
+        variant: 'danger',
+        action: () => deleteSantri(santri.id)
       }
-    })
-  } else {
-    items.push({
-      label: 'Restore',
-      icon: 'i-lucide-undo-2',
-      onSelect: () => {
-        confirmOptions.value = {
-          title: 'Pulihkan Santri',
-          description: `Apakah kamu yakin ingin memulihkan santri ${santri.full_name}?`,
-          variant: 'info',
-          action: () => restoreSantri(santri.id)
-        }
-        showConfirmDialog.value = true
+      showConfirmDialog.value = true
+    }
+  })
+} else {
+  // Pilihan jika santri sudah dihapus (soft delete)
+  items.push({
+    label: 'Restore',
+    icon: 'i-lucide-undo-2',
+    onSelect: () => {
+      confirmOptions.value = {
+        title: 'Pulihkan Santri',
+        description: `Apakah kamu yakin ingin memulihkan santri ${santri.full_name}?`,
+        variant: 'info',
+        action: () => restoreSantri(santri.id)
       }
-    })
-  }
-
+      showConfirmDialog.value = true
+    }
+  }, {
+    label: 'Hapus Permanen',
+    icon: 'i-lucide-trash',
+    onSelect: () => {
+      confirmOptions.value = {
+        title: 'Hapus Permanen Santri',
+        description: `Apakah kamu yakin ingin menghapus permanen santri ${santri.full_name}? Tindakan ini tidak dapat dibatalkan.`,
+        variant: 'danger', // Variasi warna yang lebih tajam untuk tindakan yang tidak dapat dibatalkan
+        action: () => deletePermanentSantri(santri.id)
+      }
+      showConfirmDialog.value = true
+    }
+  })
+}
   return items
 }
 
@@ -295,6 +306,31 @@ async function deleteSantri(id: string) {
     toast.add({ title: 'Gagal menghapus santri', color: 'error' })
   }
 }
+
+async function deletePermanentSantri(id: string) {
+  confirmOptions.value = {
+    title: 'Hapus Permanen Santri',
+    description: 'Apakah Anda yakin ingin menghapus permanen santri ini? Tindakan ini tidak dapat dibatalkan.',
+    variant: 'danger',
+    action: async () => {
+      try {
+        const response = await $fetch(`/api/santris/${id}/delete-permanent`, { method: 'DELETE' })
+        
+        // Cek jika berhasil
+        if (response?.success) {
+          toast.add({ title: 'Santri dihapus permanen!', color: 'success', icon: 'i-lucide-trash' })
+          fetchSantris()  // Reload the list of santris
+        } else {
+          throw new Error(response?.message || 'Gagal menghapus santri permanen')
+        }
+      } catch (error) {
+        toast.add({ title: error.message || 'Gagal menghapus permanen santri', color: 'error' })
+      }
+    }
+  }
+  showConfirmDialog.value = true
+}
+
 
 async function restoreSantri(id: string) {
   try {

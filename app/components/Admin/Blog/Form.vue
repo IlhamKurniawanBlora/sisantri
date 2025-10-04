@@ -248,7 +248,7 @@ onBeforeUnmount(() => {
         class="w-full"
       />
       <template #help>
-        URL blog akan menjadi: /blogs/{{ formState.slug }}
+        URL berita akan menjadi: /blogs/{{ formState.slug }}
       </template>
     </UFormField>
 
@@ -267,7 +267,7 @@ onBeforeUnmount(() => {
     <UFormField label="Deskripsi" name="description" required class="w-full">
       <UTextarea 
         v-model="formState.description" 
-        placeholder="Masukkan deskripsi singkat blog"
+        placeholder="Masukkan deskripsi singkat berita"
         :rows="3"
         class="w-full"
         :disabled="loading"

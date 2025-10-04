@@ -75,7 +75,7 @@ const hasActiveFilters = computed(() => {
         <UInput
           v-model="searchModel"
           icon="i-lucide-search"
-          placeholder="Cari judul, deskripsi, atau konten blog..."
+          placeholder="Cari judul, deskripsi, atau konten berita..."
           :trailing="search ? true : false"
           :loading="loading"
           size="lg"

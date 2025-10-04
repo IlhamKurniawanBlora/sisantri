@@ -73,7 +73,7 @@
 const footerLinks = [
   { name: 'Beranda', href: '/' },
   { name: 'Santri', href: '/santri' },
-  { name: 'Blog', href: '/blogs' },
+  { name: 'Berita', href: '/blogs' },
   { name: 'Tentang', href: '/about' }
 ]
 </script>

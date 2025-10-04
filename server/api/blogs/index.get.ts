@@ -125,7 +125,7 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (err: any) {
-    console.error('Blog API Error:', err)
+    console.error('Berita API Error:', err)
     throw createError({
       statusCode: err?.statusCode || 500,
       statusMessage:

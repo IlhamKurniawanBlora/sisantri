@@ -169,43 +169,6 @@
             </UCard>
           </div>
 
-          <!-- Program Pendidikan -->
-          <UCard>
-            <template #header>
-              <div class="flex items-center space-x-3">
-                <UIcon name="i-lucide-graduation-cap" class="h-6 w-6 text-primary-600" />
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Program Pendidikan</h3>
-              </div>
-            </template>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div class="space-y-2">
-                <h4 class="font-semibold text-gray-900 dark:text-white">Pendidikan Formal</h4>
-                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• Madrasah Tsanawiyah (MTs)</li>
-                  <li>• Madrasah Aliyah (MA)</li>
-                  <li>• Program Tahfidz Al-Qur'an</li>
-                </ul>
-              </div>
-              <div class="space-y-2">
-                <h4 class="font-semibold text-gray-900 dark:text-white">Pendidikan Diniyah</h4>
-                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• Kajian Kitab Kuning</li>
-                  <li>• Bahasa Arab & Inggris</li>
-                  <li>• Fiqh dan Ushul Fiqh</li>
-                </ul>
-              </div>
-              <div class="space-y-2">
-                <h4 class="font-semibold text-gray-900 dark:text-white">Ekstrakurikuler</h4>
-                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• Seni & Budaya Islam</li>
-                  <li>• Olahraga & Kesehatan</li>
-                  <li>• Kewirausahaan</li>
-                </ul>
-              </div>
-            </div>
-          </UCard>
-
           <!-- Fasilitas -->
           <UCard>
             <template #header>
@@ -257,28 +220,6 @@
               </div>
             </div>
           </UCard>
-        </div>
-      </div>
-    </section>
-
-    <!-- Call to Action -->
-    <section class="py-16 text-center">
-      <div class="max-w-3xl mx-auto space-y-6">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-          Jelajahi Informasi <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
-        </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-300">
-          Temukan informasi lengkap tentang santri dan berita terbaru dari Pondok Pesantren Dawam melalui platform SiDawam.
-        </p>
-        <div class="space-x-4">
-          <UButton to="/santri" color="primary" size="lg">
-            <UIcon name="i-lucide-users" class="mr-2" />
-            Cari Data Santri
-          </UButton>
-          <UButton to="/blogs" variant="outline" color="primary" size="lg">
-            <UIcon name="i-lucide-newspaper" class="mr-2" />
-            Baca Berita
-          </UButton>
         </div>
       </div>
     </section>

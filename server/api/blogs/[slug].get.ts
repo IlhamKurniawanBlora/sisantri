@@ -79,7 +79,27 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await supabase
       .schema('public')
       .from('blogs')
-      .select('*')
+      .select(`
+        id,
+        slug,
+        title,
+        description,
+        content,
+        category,
+        tags,
+        image_url,
+        author_id,
+        created_at,
+        updated_at,
+        deleted_at,
+        views,
+        profiles:author_id (
+          id,
+          full_name,
+          avatar_url,
+          bio
+        )
+      `)
       .eq('slug', slug)
       .is('deleted_at', null)
       .single()
@@ -99,6 +119,7 @@ export default defineEventHandler(async (event) => {
       data
     }
   } catch (err: any) {
+    console.error('Get Blog Error:', err)
     throw createError({
       statusCode: err?.statusCode || 500,
       statusMessage: err?.statusMessage || err?.message || 'Internal server error'

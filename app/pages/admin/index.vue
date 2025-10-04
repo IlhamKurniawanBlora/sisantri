@@ -136,12 +136,12 @@ onMounted(async () => {
     <div class="flex flex-wrap gap-4 mb-8">
       <NuxtLink to="/admin/blogs">
         <UButton color="primary" icon="i-lucide-newspaper" size="lg">
-          Kelola Blogs
+          Kelola Berita
         </UButton>
       </NuxtLink>
       <NuxtLink to="/admin/santris">
         <UButton color="primary" icon="i-lucide-users" size="lg">
-          Kelola Santris
+          Kelola Santri
         </UButton>
       </NuxtLink>
     </div>
@@ -155,7 +155,7 @@ onMounted(async () => {
             <UIcon name="i-lucide-users" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Santris</p>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Santri</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalSantris }}</p>
           </div>
         </div>
@@ -168,7 +168,7 @@ onMounted(async () => {
             <UIcon name="i-lucide-newspaper" class="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Blogs</p>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Berita</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalBlogs }}</p>
           </div>
         </div>

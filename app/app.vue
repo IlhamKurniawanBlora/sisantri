@@ -3,14 +3,10 @@
 
 <template>
   <UApp>
-    <!-- Accessibility -->
     <NuxtRouteAnnouncer />
-
-    <!-- Global Layout -->
     <UMain>
     <NuxtLayout>
         <Transition name="page" mode="out-in" appear>
-          <!-- Bungkus NuxtPage dengan elemen tunggal -->
           <div class="page-wrapper">
             <NuxtPage />
           </div>

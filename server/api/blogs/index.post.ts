@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
         .single()
 
       if (existingError) {
-        throw createError({ statusCode: 404, statusMessage: 'Blog not found' })
+        throw createError({ statusCode: 404, statusMessage: 'Berita not found' })
       }
 
       const updateData: any = {
@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
 
       if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
-      return { success: true, data, message: 'Blog updated successfully' }
+      return { success: true, data, message: 'Berita updated successfully' }
     }
 
     // --- Create data baru ---
@@ -134,10 +134,10 @@ export default defineEventHandler(async (event) => {
 
     if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
-    return { success: true, data, message: 'Blog created successfully' }
+    return { success: true, data, message: 'Berita created successfully' }
 
   } catch (error: any) {
-    console.error('Blog API error:', error)
+    console.error('Berita API error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Internal server error'

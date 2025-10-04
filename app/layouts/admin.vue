@@ -50,16 +50,16 @@ const confirmLogout = async (confirmed: boolean) => {
 
 const sidebarLinks = [
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin', exact: true },
-  { label: 'Blogs', icon: 'i-lucide-file-text', to: '/admin/blogs' },
-  { label: 'Santris', icon: 'i-lucide-users', to: '/admin/santris' },
-  { label: 'Settings', icon: 'i-lucide-settings', to: '/admin/settings' }
+  { label: 'Berita', icon: 'i-lucide-file-text', to: '/admin/blogs' },
+  { label: 'Santri', icon: 'i-lucide-users', to: '/admin/santris' },
+  { label: 'Pengaturan', icon: 'i-lucide-settings', to: '/admin/settings' }
 ]
 
 const userMenuItems = [
   { label: 'Profile', icon: 'i-lucide-user', onSelect() {
         navigateTo(`/admin/profile`)
       } },
-  { label: 'Settings', icon: 'i-lucide-settings', onSelect() {
+  { label: 'Pengaturan', icon: 'i-lucide-settings', onSelect() {
         navigateTo('/admin/settings')
       } },
   { label: 'Logout', icon: 'i-lucide-log-out', onSelect: handleLogout }

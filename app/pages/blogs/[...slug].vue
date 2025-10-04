@@ -16,25 +16,25 @@ const blog = computed(() => res.value?.data)
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode || 404,
-    statusMessage: error.value.statusMessage || 'Blog not found'
+    statusMessage: error.value.statusMessage || 'Berita not found'
   })
 }
 
 // SEO Meta
 useHead({
-  title: () => blog.value?.title || 'Blog Post',
+  title: () => blog.value?.title || 'Berita Post',
   meta: [
     {
       name: 'description',
-      content: () => blog.value?.description || 'Read this blog post'
+      content: () => blog.value?.description || 'Read this berita post'
     },
     {
       property: 'og:title',
-      content: () => blog.value?.title || 'Blog Post'
+      content: () => blog.value?.title || 'Berita Post'
     },
     {
       property: 'og:description',
-      content: () => blog.value?.description || 'Read this blog post'
+      content: () => blog.value?.description || 'Read this berita post'
     },
     {
       property: 'og:type',
@@ -95,7 +95,7 @@ const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl.value)
     toast.add({
       title: 'Link berhasil disalin!',
-      description: 'Link artikel telah disalin ke clipboard',
+      description: 'Link berita telah disalin ke clipboard',
       icon: 'i-lucide-clipboard-check',
     })
   } catch (err) {
@@ -145,7 +145,7 @@ const formattedContent = computed(() => {
       <UBreadcrumb 
         :links="[
           { label: 'Home', to: '/' },
-          { label: 'Blog', to: '/blogs' },
+          { label: 'Berita', to: '/blogs' },
           { label: blog.title, to: `/blogs/${blog.slug}` }
         ]"
         class="mb-8"
@@ -240,7 +240,7 @@ const formattedContent = computed(() => {
         <UCard>
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Bagikan artikel:
+              Bagikan berita:
             </span>
             <div class="flex gap-2">
               <UButton
@@ -319,7 +319,7 @@ const formattedContent = computed(() => {
             variant="outline"
             icon="i-lucide-arrow-left"
           >
-            Kembali ke Blog
+            Kembali ke Berita
           </UButton>
         </div>
       </footer>
@@ -329,17 +329,14 @@ const formattedContent = computed(() => {
     <div v-else-if="error" class="max-w-2xl mx-auto text-center py-12">
       <UIcon name="i-lucide-info" class="w-16 h-16 text-red-500 mx-auto mb-4" />
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Blog tidak ditemukan
+        Berita tidak ditemukan
       </h1>
       <p class="text-gray-600 dark:text-gray-300 mb-6">
-        Maaf, artikel yang Anda cari tidak dapat ditemukan.
+        Maaf, berita yang Anda cari tidak dapat ditemukan.
       </p>
       <UButton to="/blogs" color="primary">
-        Kembali ke Blog
+        Kembali ke Berita
       </UButton>
     </div>
-
-    <!-- Toast Notifications -->
-    <UNotifications />
   </div>
 </template>

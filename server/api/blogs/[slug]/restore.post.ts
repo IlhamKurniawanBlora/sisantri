@@ -22,13 +22,13 @@ export default defineEventHandler(async (event) => {
     if (error) {
       throw createError({
         statusCode: 400,
-        statusMessage: `Failed to restore blog: ${error.message}`
+        statusMessage: `Failed to restore berita: ${error.message}`
       })
     }
 
-    return { success: true, message: 'Blog restored successfully' }
+    return { success: true, message: 'Berita restored successfully' }
   } catch (err: any) {
-    console.error('Restore Blog Error:', err)
+    console.error('Restore Berita Error:', err)
     throw createError({
       statusCode: err?.statusCode || 500,
       statusMessage:

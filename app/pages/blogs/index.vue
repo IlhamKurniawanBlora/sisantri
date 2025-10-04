@@ -76,10 +76,10 @@ const clearSearch = () => {
           <UIcon name="i-lucide-newspaper" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          Blog <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
+          Berita <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
         </h1>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-          Temukan berbagai artikel, berita, dan cerita menarik seputar dunia pondok pesantren dan kehidupan santri
+          Temukan berbagai berita, dan cerita menarik seputar dunia pondok pesantren dan kehidupan santri
         </p>
         
         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
@@ -102,14 +102,14 @@ const clearSearch = () => {
     <!-- Judul + info artikel -->
     <div>
       <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
-        {{ search ? 'Hasil Pencarian' : 'Artikel Terbaru' }}
+        {{ search ? 'Hasil Pencarian' : 'Berita Terbaru' }}
       </h2>
       <p class="text-gray-600 dark:text-gray-300 mt-1">
         <template v-if="pending">
           Sedang memuat...
         </template>
         <template v-else>
-          {{ total }} artikel ditemukan
+          {{ total }} Berita ditemukan
         </template>
       </p>
     </div>
@@ -120,7 +120,7 @@ const clearSearch = () => {
       <div class="flex items-center gap-2 w-full sm:max-w-md">
         <UInput
           v-model="search"
-          placeholder="Cari artikel, judul, atau konten..."
+          placeholder="Cari Berita, judul, atau konten..."
           size="lg"
           :loading="pending"
           class="flex-1"
@@ -173,7 +173,7 @@ const clearSearch = () => {
         Terjadi Kesalahan
       </h3>
       <p class="text-gray-600 dark:text-gray-300 mb-4">
-        Gagal memuat artikel. Silakan coba lagi.
+        Gagal memuat berita. Silakan coba lagi.
       </p>
       <UButton @click="refresh" variant="outline">
         <UIcon name="i-lucide-refresh-cw" class="mr-2" />
@@ -184,12 +184,12 @@ const clearSearch = () => {
     <div v-else-if="blogs.length === 0" class="text-center py-12">
       <UIcon name="i-lucide-file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-        {{ search ? 'Artikel Tidak Ditemukan' : 'Belum Ada Artikel' }}
+        {{ search ? 'Berita Tidak Ditemukan' : 'Belum Ada Berita' }}
       </h3>
       <p class="text-gray-600 dark:text-gray-300 mb-4">
         {{ search 
-          ? `Tidak ditemukan artikel yang sesuai dengan "${search}"` 
-          : 'Belum ada artikel yang dipublikasikan.'
+          ? `Tidak ditemukan berita yang sesuai dengan "${search}"` 
+          : 'Belum ada berita yang dipublikasikan.'
         }}
       </p>
       <UButton v-if="search" @click="clearSearch" variant="outline">

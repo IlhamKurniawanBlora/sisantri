@@ -81,8 +81,8 @@ function openConfirmDialog(opts: {
 // Delete Blog
 function requestDeleteBlog(blog: Blog) {
   openConfirmDialog({
-    title: 'Hapus Blog',
-    description: `Apakah Anda yakin ingin menghapus blog "${blog.title}"?`,
+    title: 'Hapus Berita',
+    description: `Apakah Anda yakin ingin menghapus berita "${blog.title}"?`,
     variant: 'destructive',
     action: async () => {
       try {
@@ -90,7 +90,24 @@ function requestDeleteBlog(blog: Blog) {
         toast.add({ title: 'Blog deleted!', color: 'success', icon: 'i-lucide-trash' })
         fetchBlogs()
       } catch (error) {
-        toast.add({ title: 'Failed to delete blog', color: 'error' })
+        toast.add({ title: 'Failed to delete berita', color: 'error' })
+      }
+    }
+  })
+}
+
+function requestDeletePermanentBlog(blog: Blog) {
+  openConfirmDialog({
+    title: 'Hapus Permanen Berita',
+    description: `Apakah Anda yakin ingin menghapus permanen berita "${blog.title}"?`,
+    variant: 'destructive',
+    action: async () => {
+      try {
+        await $fetch(`/api/blogs/${blog.slug}/delete-permanent`, { method: 'DELETE' })
+        toast.add({ title: 'Blog deleted!', color: 'success', icon: 'i-lucide-trash' })
+        fetchBlogs()
+      } catch (error) {
+        toast.add({ title: 'Failed to delete berita', color: 'error' })
       }
     }
   })
@@ -99,16 +116,16 @@ function requestDeleteBlog(blog: Blog) {
 // Restore Blog
 function requestRestoreBlog(blog: Blog) {
   openConfirmDialog({
-    title: 'Pulihkan Blog',
-    description: `Apakah Anda yakin ingin memulihkan blog "${blog.title}"?`,
+    title: 'Pulihkan Berita',
+    description: `Apakah Anda yakin ingin memulihkan berita "${blog.title}"?`,
     variant: 'default',
     action: async () => {
       try {
         await $fetch(`/api/blogs/${blog.slug}/restore`, { method: 'POST' })
-        toast.add({ title: 'Blog restored!', color: 'success', icon: 'i-lucide-undo-2' })
+        toast.add({ title: 'Berita restored!', color: 'success', icon: 'i-lucide-undo-2' })
         fetchBlogs()
       } catch (error) {
-        toast.add({ title: 'Failed to restore blog', color: 'error' })
+        toast.add({ title: 'Failed to restore berita', color: 'error' })
       }
     }
   })
@@ -192,7 +209,7 @@ const sortOptions = [
 const columns: TableColumn<Blog>[] = [
   {
     accessorKey: 'title',
-    header: 'Judul Blog',
+    header: 'Judul Berita',
     cell: ({ row }) => {
       const blog = row.original
       return h('div', { class: 'min-w-0' }, [
@@ -346,13 +363,17 @@ function getRowItems(row: Row<Blog>) {
     items.push({
       label: 'Delete',
       icon: 'i-lucide-trash',
-      onSelect: () => requestDeleteBlog(blog) // ✅ ganti ke confirm dialog
+      onSelect: () => requestDeleteBlog(blog)
     })
   } else {
     items.push({
       label: 'Restore',
       icon: 'i-lucide-undo-2',
       onSelect: () => requestRestoreBlog(blog) // ✅ ganti ke confirm dialog
+    },{
+      label: 'Delete Permanent',
+      icon: 'i-lucide-trash',
+      onSelect: () => requestDeletePermanentBlog(blog)
     })
   }
 
@@ -403,10 +424,10 @@ const handleBlogSaved = () => {
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <UIcon name="i-lucide-newspaper" class="w-6 h-6" />
-          Kelola Blog
+          Kelola Berita
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Kelola artikel dan konten blog pesantren
+          Kelola konten berita pesantren
         </p>
       </div>
       <UButton
@@ -429,7 +450,7 @@ const handleBlogSaved = () => {
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Blog</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Berita</p>
             <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.total }}</p>
           </div>
         </div>
@@ -490,7 +511,7 @@ const handleBlogSaved = () => {
           <UInput
             v-model="search"
             icon="i-lucide-search"
-            placeholder="Cari judul, konten, atau tag blog..."
+            placeholder="Cari judul, konten, atau tag berita..."
             :trailing="search ? true : false"
             :loading="loading"
           >
@@ -555,12 +576,12 @@ const handleBlogSaved = () => {
       <div class="text-center py-12">
         <UIcon name="i-lucide-file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {{ search ? 'Blog Tidak Ditemukan' : 'Belum Ada Blog' }}
+          {{ search ? 'Berita Tidak Ditemukan' : 'Belum Ada Berita' }}
         </h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
           {{ search 
-            ? `Tidak ditemukan blog yang sesuai dengan pencarian "${search}"` 
-            : 'Belum ada blog yang dibuat. Mulai dengan menambahkan blog pertama.'
+            ? `Tidak ditemukan berita yang sesuai dengan pencarian "${search}"` 
+            : 'Belum ada berita yang dibuat. Mulai dengan menambahkan berita pertama.'
           }}
         </p>
         <div class="flex justify-center gap-2">
@@ -570,7 +591,7 @@ const handleBlogSaved = () => {
           </UButton>
           <UButton @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }">
             <UIcon name="i-lucide-plus" class="mr-2" />
-            Tambah Blog
+            Tambah Berita
           </UButton>
         </div>
       </div>
@@ -605,7 +626,7 @@ const handleBlogSaved = () => {
     </UCard>
 
       <!-- Slideover Form -->
-    <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Blog' : 'Edit Blog'">
+    <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Berita' : 'Edit Berita'">
       <template #body>
         <BlogFormContent
           :mode="mode"
@@ -622,10 +643,10 @@ const handleBlogSaved = () => {
         <UIcon name="i-lucide-file-text" class="w-6 h-6 text-primary" />
         <div>
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Detail Blog
+            Detail Berita
           </h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Informasi lengkap artikel blog
+            Informasi lengkap berita
           </p>
         </div>
       </div>
