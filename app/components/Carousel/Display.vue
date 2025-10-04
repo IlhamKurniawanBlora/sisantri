@@ -63,7 +63,7 @@ onMounted(() => {
       :drag-free="false"
       :align="'center'"
       :autoplay="{ 
-        delay: 1000, 
+        delay: 5000, 
         stopOnInteraction: true,
         stopOnMouseEnter: true,
         playOnInit: true
