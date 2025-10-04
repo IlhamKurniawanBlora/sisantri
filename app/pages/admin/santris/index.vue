@@ -85,6 +85,7 @@ watch(search, (newValue) => {
 watch([debouncedSearch, selectedGender, includeDeleted], () => {
   page.value = 1
   fetchSantris()
+  fetchSantriStats()
 })
 
 // Fetch data function
@@ -116,11 +117,39 @@ async function fetchSantris() {
   loading.value = false
 }
 
-onMounted(fetchSantris)
+// Tambah di bagian atas
+const stats = ref({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  male: 0,
+  female: 0
+})
+
+// Fungsi ambil statistik dari server
+async function fetchSantriStats() {
+  try {
+    const response = await $fetch('/api/santris/stats')
+    stats.value = response
+  } catch (error) {
+    console.error('Error fetching santri stats:', error)
+    toast.add({
+      title: 'Error',
+      description: 'Gagal memuat statistik santri',
+      color: 'error'
+    })
+  }
+}
+
+onMounted(() => {
+  fetchSantris()
+  fetchSantriStats()
+})
 
 // Watch page changes
 watch(page, () => {
   fetchSantris()
+  fetchSantriStats()
 })
 
 // Gender options
@@ -299,7 +328,7 @@ if (!santri.deleted_at) {
 // CRUD operations
 async function deleteSantri(id: string) {
   try {
-    await $fetch(`/api/santris/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/santris/${id}/delete`, { method: 'DELETE' })
     toast.add({ title: 'Santri dihapus!', color: 'success', icon: 'i-lucide-trash' })
     fetchSantris()
   } catch (error) {
@@ -342,20 +371,6 @@ async function restoreSantri(id: string) {
   }
 }
 
-// Stats computed
-const stats = computed(() => {
-  const activeSantris = data.value.filter(s => !s.deleted_at && (s.status === 'active' || !s.status))
-  const maleSantris = data.value.filter(s => s.gender === 'male' && !s.deleted_at)
-  const femaleSantris = data.value.filter(s => s.gender === 'female' && !s.deleted_at)
-  
-  return {
-    total: total.value,
-    active: activeSantris.length,
-    male: maleSantris.length,
-    female: femaleSantris.length
-  }
-})
-
 // Clear filters
 const clearFilters = () => {
   search.value = ''
@@ -368,10 +383,7 @@ const clearFilters = () => {
 const handleSantriSaved = () => {
   showSlideover.value = false
   fetchSantris()
-  toast.add({
-    title: mode.value === 'add' ? 'Santri berhasil ditambahkan!' : 'Santri berhasil diperbarui!',
-    color: 'success'
-  })
+  fetchSantriStats()
 }
 </script>
 
@@ -400,6 +412,7 @@ const handleSantriSaved = () => {
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Total -->
       <UCard>
         <div class="flex items-center">
           <div class="flex-shrink-0">
@@ -414,6 +427,7 @@ const handleSantriSaved = () => {
         </div>
       </UCard>
 
+      <!-- Aktif -->
       <UCard>
         <div class="flex items-center">
           <div class="flex-shrink-0">
@@ -428,30 +442,41 @@ const handleSantriSaved = () => {
         </div>
       </UCard>
 
+      <!-- Tidak Aktif -->
       <UCard>
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-              <UIcon name="i-lucide-user" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-x-circle" class="w-5 h-5 text-red-600 dark:text-red-400" />
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Laki-laki</p>
-            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.male }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tidak Aktif</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.inactive }}</p>
           </div>
         </div>
       </UCard>
 
+      <!-- Gender -->
       <UCard>
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
+        <div class="flex items-center justify-center gap-6">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+              <UIcon name="i-lucide-user" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">L</p>
+              <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.male }}</p>
+            </div>
+          </div>
+          <div class="flex items-center">
             <div class="w-8 h-8 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center">
               <UIcon name="i-lucide-user" class="w-5 h-5 text-pink-600 dark:text-pink-400" />
             </div>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Perempuan</p>
-            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.female }}</p>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">P</p>
+              <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.female }}</p>
+            </div>
           </div>
         </div>
       </UCard>

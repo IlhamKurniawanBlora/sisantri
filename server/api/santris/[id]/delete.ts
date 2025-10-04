@@ -1,5 +1,5 @@
 // server/api/santris/[id].delete.ts
-import { serverSupabase } from '../../utils/supabase'
+import { serverSupabase } from '../../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   try {
