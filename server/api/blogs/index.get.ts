@@ -1,4 +1,3 @@
-// server/api/blogs/index.get.ts
 import { serverSupabase } from '../../utils/supabase'
 
 interface BlogQuery {
@@ -17,22 +16,22 @@ export default defineEventHandler(async (event) => {
     const supabase = serverSupabase()
     const query = getQuery(event) as BlogQuery
 
-    // Normalisasi query
-    const page = Number(query.page) || 1
-    const limit = Number(query.limit) || 10
-    const search = query.search
-    const category = query.category
-    const tags = query.tags
-    const author_id = query.author_id
-    const sortBy = query.sortBy || 'newest'
+    // ✅ Default pagination & parsing
+    const page = Math.max(1, Number(query.page) || 1)
+    const limit = Math.max(1, Number(query.limit) || 10)
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
-    // Pastikan includeDeleted -> boolean
-    const includeDeleted = (
+    // ✅ Filters
+    const search = query.search?.trim() || ''
+    const category = query.category?.trim() || ''
+    const author_id = query.author_id?.trim() || ''
+    const sortBy = query.sortBy || 'newest'
+    const includeDeleted =
       query.includeDeleted === true ||
       query.includeDeleted === 'true' ||
       query.includeDeleted === 1 ||
       query.includeDeleted === '1'
-    )
 
     let supabaseQuery = supabase
       .from('blogs')
@@ -44,44 +43,44 @@ export default defineEventHandler(async (event) => {
           full_name,
           avatar_url
         )
-      `,
+        `,
         { count: 'exact' }
       )
 
-    // Filter non-deleted secara default
+    // ✅ Filter deleted data
     if (!includeDeleted) {
       supabaseQuery = supabaseQuery.is('deleted_at', null)
     }
 
-    // Search
+    // ✅ Search
     if (search) {
       supabaseQuery = supabaseQuery.or(
         `title.ilike.%${search}%,description.ilike.%${search}%,content.ilike.%${search}%`
       )
     }
 
-    // Category
+    // ✅ Category
     if (category) {
       supabaseQuery = supabaseQuery.eq('category', category)
     }
 
-    // Tags (array overlaps)
-    if (tags) {
-      const tagArray = tags.split(',').map((tag) => tag.trim())
-      supabaseQuery = supabaseQuery.overlaps('tags', tagArray)
+    // ✅ Tags (array field)
+    if (query.tags) {
+      const tagArray = query.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((t) => t.length > 0)
+      if (tagArray.length > 0) {
+        supabaseQuery = supabaseQuery.overlaps('tags', tagArray)
+      }
     }
 
-    // Author filter
+    // ✅ Author filter
     if (author_id) {
       supabaseQuery = supabaseQuery.eq('author_id', author_id)
     }
 
-    // Pagination
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    supabaseQuery = supabaseQuery.range(from, to)
-
-    // Sorting
+    // ✅ Sorting
     switch (sortBy) {
       case 'oldest':
         supabaseQuery = supabaseQuery.order('created_at', { ascending: true })
@@ -92,18 +91,20 @@ export default defineEventHandler(async (event) => {
       case 'title_desc':
         supabaseQuery = supabaseQuery.order('title', { ascending: false })
         break
-      case 'newest':
       default:
         supabaseQuery = supabaseQuery.order('created_at', { ascending: false })
         break
     }
+
+    // ✅ Range for pagination
+    supabaseQuery = supabaseQuery.range(from, to)
 
     const { data, error, count } = await supabaseQuery
 
     if (error) {
       throw createError({
         statusCode: 400,
-        statusMessage: `Failed to fetch blogs: ${error.message}`
+        statusMessage: `Gagal mengambil data Berita: ${error.message}`
       })
     }
 
@@ -119,13 +120,14 @@ export default defineEventHandler(async (event) => {
       filters: {
         search: search || null,
         category: category || null,
-        tags: tags || null,
+        tags: query.tags || null,
         author_id: author_id || null,
-        sortBy
+        sortBy,
+        includeDeleted
       }
     }
   } catch (err: any) {
-    console.error('Berita API Error:', err)
+    console.error('❌ Berita API Error:', err)
     throw createError({
       statusCode: err?.statusCode || 500,
       statusMessage:

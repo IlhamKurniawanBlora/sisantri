@@ -1,4 +1,3 @@
-// server/api/blogs/[slug]/restore.post.ts
 import { serverSupabase } from '../../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
@@ -13,7 +12,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Restore: set deleted_at = null
     const { error } = await supabase
       .from('blogs')
       .update({ deleted_at: null })

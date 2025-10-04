@@ -1,53 +1,52 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const route = useRoute()
 const slug = route.params.slug as string
 
-// Fetch blog data
-const { data: res, pending, error, refresh } = await useAsyncData(
+console.log('Blog slug:', slug)
+
+// 🎯 Type Interface
+interface Blog {
+  id: string
+  title: string
+  description: string
+  image_url?: string
+  category?: string
+  slug: string
+  content?: string
+  created_at: string
+  views?: number
+  tags?: string[]
+  profiles?: {
+    avatar_url?: string
+    full_name?: string
+    bio?: string
+  }
+}
+
+interface BlogResponse {
+  success: boolean
+  data: Blog
+}
+
+// 🧠 Ambil data blog by slug
+const { data: res, pending, error } = await useAsyncData<BlogResponse>(
   `blog-${slug}`,
-  () => $fetch(`/api/blogs/${slug}`)
+  () => $fetch(`/api/blogs/${slug}/get`)
 )
 
 const blog = computed(() => res.value?.data)
 
-// Handle error states
-if (error.value) {
+// ❌ Handle error
+if (error.value || !blog.value) {
   throw createError({
-    statusCode: error.value.statusCode || 404,
-    statusMessage: error.value.statusMessage || 'Berita not found'
+    statusCode: error.value?.statusCode || 404,
+    statusMessage: error.value?.statusMessage || 'Berita tidak ditemukan'
   })
 }
 
-// SEO Meta
-useHead({
-  title: () => blog.value?.title || 'Berita Post',
-  meta: [
-    {
-      name: 'description',
-      content: () => blog.value?.description || 'Read this berita post'
-    },
-    {
-      property: 'og:title',
-      content: () => blog.value?.title || 'Berita Post'
-    },
-    {
-      property: 'og:description',
-      content: () => blog.value?.description || 'Read this berita post'
-    },
-    {
-      property: 'og:type',
-      content: 'article'
-    },
-    {
-      property: 'og:image',
-      content: () => blog.value?.image_url || ''
-    }
-  ]
-})
-
-// Format date
+// 🧩 Format tanggal
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('id-ID', {
     year: 'numeric',
@@ -56,22 +55,27 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Reading time calculation
+// ⏱️ Hitung waktu baca
 const calculateReadingTime = (content: string) => {
   const wordsPerMinute = 200
   const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length
-  const minutes = Math.ceil(words / wordsPerMinute)
-  return minutes
+  return Math.ceil(words / wordsPerMinute)
 }
 
-// Share functions
-const shareUrl = computed(() => {
-  if (process.client) {
-    return window.location.href
-  }
-  return ''
+// 🧭 SEO Meta
+useHead({
+  title: blog.value?.title || 'Berita',
+  meta: [
+    { name: 'description', content: blog.value?.description || '' },
+    { property: 'og:title', content: blog.value?.title || '' },
+    { property: 'og:description', content: blog.value?.description || '' },
+    { property: 'og:image', content: blog.value?.image_url || '' },
+    { property: 'og:type', content: 'article' }
+  ]
 })
 
+// 🔗 Share functions
+const shareUrl = computed(() => (process.client ? window.location.href : ''))
 const toast = useToast()
 
 const shareOnTwitter = () => {
@@ -95,10 +99,10 @@ const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl.value)
     toast.add({
       title: 'Link berhasil disalin!',
-      description: 'Link berita telah disalin ke clipboard',
-      icon: 'i-lucide-clipboard-check',
+      description: 'Tautan berita telah disalin ke clipboard',
+      icon: 'i-lucide-clipboard-check'
     })
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Gagal menyalin link',
       description: 'Terjadi kesalahan saat menyalin link',
@@ -108,22 +112,26 @@ const copyLink = async () => {
   }
 }
 
-// Parse markdown content to HTML
-const parseMarkdown = (content: string) => {
+const parseMarkdown = (content?: string) => {
+  if (!content || typeof content !== 'string') return '' // prevent non-string errors
+
   return content
     .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4 mt-6">$1</h1>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 mt-5">$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mb-2 mt-4">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold mb-3 mt-5">$1</h2>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>')
     .replace(/^\- (.*$)/gim, '<li class="ml-4 mb-1">• $1</li>')
     .replace(/\n\n/gim, '</p><p class="mb-4">')
     .replace(/\r\n/gim, '<br>')
 }
 
 const formattedContent = computed(() => {
-  if (!blog.value?.content) return ''
-  return `<p class="mb-4">${parseMarkdown(blog.value.content)}</p>`
+  const content = blog.value?.content
+  if (!content || typeof content !== 'string') return ''
+  return `<p class="mb-4">${parseMarkdown(content)}</p>`
 })
+
 </script>
+
 
 <template>
   <div class="container mx-auto px-4 py-8">
@@ -281,11 +289,12 @@ const formattedContent = computed(() => {
       </header>
 
       <!-- Content -->
-      <UCard class="mb-8">
+      <UCard class="mb-8" v-if="formattedContent">
         <div class="prose prose-lg dark:prose-invert max-w-none">
           <div v-html="formattedContent" class="leading-relaxed"></div>
         </div>
       </UCard>
+
 
       <!-- Footer -->
       <footer class="space-y-6">

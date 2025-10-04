@@ -175,7 +175,7 @@ async function handleAdd() {
     showSlideover.value = false
     formState.file = null
     formState.previewUrl = null
-    await fetchCarousel()
+    fetchCarousel()
   } catch (e: any) {
     toast.add({ title: 'Gagal menambah carousel', description: e?.data?.message || e.message, color: 'error' })
   }
@@ -194,7 +194,7 @@ async function handleEdit() {
     showSlideover.value = false
     formState.file = null
     formState.previewUrl = null
-    await fetchCarousel()
+    fetchCarousel()
   } catch (e: any) {
     toast.add({ title: 'Gagal update carousel', description: e?.data?.message || e.message, color: 'error' })
   }

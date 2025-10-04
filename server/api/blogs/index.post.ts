@@ -1,4 +1,3 @@
-// server/api/blogs/index.post.ts
 import type { MultiPartData } from 'h3'
 import { serverSupabase } from '../../utils/supabase'
 
@@ -10,7 +9,6 @@ export default defineEventHandler(async (event) => {
     let fileName: string | null = null
     let fileType: string | null = null
 
-    // --- Parse body & file ---
     if (contentType.includes('multipart/form-data')) {
       const formData = await readMultipartFormData(event)
       if (!formData) {
@@ -38,7 +36,6 @@ export default defineEventHandler(async (event) => {
 
     const supabase = await serverSupabase()
 
-    // --- Buat slug aman ---
     const slug = body.slug?.toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
@@ -47,7 +44,6 @@ export default defineEventHandler(async (event) => {
 
     let imageUrl: string | null = null
 
-    // --- Upload file ke bucket ---
     if (fileBuffer && fileName) {
       const ext = fileName.split('.').pop()
       const folderId = body.id || `temp-${Date.now()}`
@@ -69,9 +65,7 @@ export default defineEventHandler(async (event) => {
       imageUrl = data.publicUrl
     }
 
-    // --- Update data ---
     if (body.id) {
-      // ambil data lama
       const { data: existing, error: existingError } = await supabase
         .from('blogs')
         .select('image_url')
@@ -92,7 +86,6 @@ export default defineEventHandler(async (event) => {
         updated_at: new Date().toISOString()
       }
 
-      // atur image_url
       if (imageUrl) {
         updateData.image_url = imageUrl
       } else if (body.image_url) {
@@ -113,7 +106,6 @@ export default defineEventHandler(async (event) => {
       return { success: true, data, message: 'Berita updated successfully' }
     }
 
-    // --- Create data baru ---
     const insertData: any = {
       slug,
       title: body.title,

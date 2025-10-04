@@ -1,5 +1,4 @@
-// server/api/blogs/[slug].delete-permanent.ts
-import { serverSupabase } from '../../utils/supabase'
+import { serverSupabase } from '../../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -14,7 +13,6 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // First check if the blog exists
         const { data: existingBlog, error: checkError } = await supabase
             .from('blogs')
             .select('id, slug, title')
@@ -24,11 +22,10 @@ export default defineEventHandler(async (event) => {
         if (checkError || !existingBlog) {
             throw createError({
                 statusCode: 404,
-                statusMessage: 'Blog tidak ditemukan'
+                statusMessage: 'Berita tidak ditemukan'
             })
         }
 
-        // Permanent delete: remove row from table
         const { error } = await supabase
             .from('blogs')
             .delete()
@@ -37,13 +34,13 @@ export default defineEventHandler(async (event) => {
         if (error) {
             throw createError({
                 statusCode: 400,
-                statusMessage: `Gagal menghapus permanen blog: ${error.message}`
+                statusMessage: `Gagal menghapus permanen berita: ${error.message}`
             })
         }
 
         return { 
             success: true, 
-            message: 'Blog berhasil dihapus permanen',
+            message: 'Berita berhasil dihapus permanen',
             data: {
                 id: existingBlog.id,
                 slug: existingBlog.slug,
@@ -51,7 +48,7 @@ export default defineEventHandler(async (event) => {
             }
         }
     } catch (err: any) {
-        console.error('Permanent Delete Blog Error:', err)
+        console.error('Permanent Delete Berita Error:', err)
         throw createError({
             statusCode: err?.statusCode || 500,
             statusMessage: err?.statusMessage || err?.message || 'Internal server error'

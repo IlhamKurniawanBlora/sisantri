@@ -18,7 +18,6 @@ const UPagination = resolveComponent('UPagination')
 const UIcon = resolveComponent('UIcon')
 const USlideover = resolveComponent('USlideover')
 const UModal = resolveComponent('UModal')
-
 const toast = useToast()
 
 type Blog = {
@@ -86,11 +85,11 @@ function requestDeleteBlog(blog: Blog) {
     variant: 'destructive',
     action: async () => {
       try {
-        await $fetch(`/api/blogs/${blog.slug}`, { method: 'DELETE' })
-        toast.add({ title: 'Blog deleted!', color: 'success', icon: 'i-lucide-trash' })
+        await $fetch(`/api/blogs/${blog.slug}/delete`, { method: 'DELETE' })
+        toast.add({ title: 'Berita berhasil dihapus!', color: 'success', icon: 'i-lucide-trash' })
         fetchBlogs()
       } catch (error) {
-        toast.add({ title: 'Failed to delete berita', color: 'error' })
+        toast.add({ title: 'gagal menghapus berita', color: 'error' })
       }
     }
   })
@@ -104,10 +103,10 @@ function requestDeletePermanentBlog(blog: Blog) {
     action: async () => {
       try {
         await $fetch(`/api/blogs/${blog.slug}/delete-permanent`, { method: 'DELETE' })
-        toast.add({ title: 'Blog deleted!', color: 'success', icon: 'i-lucide-trash' })
+        toast.add({ title: 'Berita berhasil dihapus permanen!', color: 'success', icon: 'i-lucide-trash' })
         fetchBlogs()
       } catch (error) {
-        toast.add({ title: 'Failed to delete berita', color: 'error' })
+        toast.add({ title: 'gagal menghapus berita', color: 'error' })
       }
     }
   })
@@ -122,10 +121,10 @@ function requestRestoreBlog(blog: Blog) {
     action: async () => {
       try {
         await $fetch(`/api/blogs/${blog.slug}/restore`, { method: 'POST' })
-        toast.add({ title: 'Berita restored!', color: 'success', icon: 'i-lucide-undo-2' })
+        toast.add({ title: 'Berita berhasil dipulihkan!', color: 'success', icon: 'i-lucide-undo-2' })
         fetchBlogs()
       } catch (error) {
-        toast.add({ title: 'Failed to restore berita', color: 'error' })
+        toast.add({ title: 'gagal memulihkan berita', color: 'error' })
       }
     }
   })
@@ -151,15 +150,20 @@ watch([debouncedSearch, selectedCategory, includeDeleted, sortBy], () => {
   fetchBlogs()
 })
 
-// Fetch data function
+const stats = ref({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  categories: 0,
+})
+
 async function fetchBlogs() {
-  loading.value = true
   try {
     const params = new URLSearchParams({
       page: page.value.toString(),
       limit: limit.value.toString(),
       sortBy: sortBy.value,
-      includeDeleted: includeDeleted.value.toString()
+      includeDeleted: includeDeleted.value.toString(),
     })
     
     if (debouncedSearch.value) params.append('search', debouncedSearch.value)
@@ -167,23 +171,47 @@ async function fetchBlogs() {
       params.append('category', selectedCategory.value)
     }
 
+    // 🔹 Ambil daftar blog
     const response = await $fetch(`/api/blogs?${params.toString()}`)
     data.value = response.data || []
     total.value = response.pagination?.total || 0
+
+    // 🔹 Ambil statistik global
+    await fetchStats()
+
   } catch (error) {
-    console.error('Error fetching blogs:', error)
+    console.error('Gagal memuat berita:', error)
     toast.add({
       title: 'Error',
-      description: 'Gagal memuat data blog',
+      description: 'Gagal memuat data berita',
       color: 'error'
     })
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
-onMounted(fetchBlogs)
+// 🔹 Fungsi baru untuk ambil statistik dari API
+async function fetchStats() {
+  try {
+    const response = await $fetch('/api/blogs/stats')
+    stats.value = {
+      total: response.total || 0,
+      active: response.active || 0,
+      inactive: response.inactive || 0,
+      categories: response.categories || 0,
+    }
+  } catch (error) {
+    console.error('Gagal memuat statistik:', error)
+  }
+}
 
-// Watch page changes
+// Jalankan saat komponen dimount
+onMounted(async () => {
+  await fetchBlogs()
+})
+
+// Jalankan ulang saat pagination berubah
 watch(page, () => {
   fetchBlogs()
 })
@@ -380,24 +408,6 @@ function getRowItems(row: Row<Blog>) {
   return items
 }
 
-// Stats computed
-const stats = computed(() => {
-  const totalCount = total.value
-  const activeCount = data.value.filter(b => !b.deleted_at).length
-  const inactiveCount = data.value.filter(b => b.deleted_at).length
-  const categories = [...new Set(data.value.filter(b => !b.deleted_at).map(b => b.category))]
-
-  return {
-    total: totalCount,
-    active: activeCount,
-    inactive: inactiveCount,
-    categories: categories.length,
-    totalViews: 0 // nanti bisa disambungkan ke field view_count kalau ada
-  }
-})
-
-
-// Clear filters
 const clearFilters = () => {
   search.value = ''
   debouncedSearch.value = ''

@@ -1,5 +1,4 @@
-// server/api/blogs/[slug].delete.ts
-import { serverSupabase } from '../../utils/supabase'
+import { serverSupabase } from '../../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,7 +12,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Soft delete: update deleted_at
     const { error } = await supabase
       .from('blogs')
       .update({ deleted_at: new Date().toISOString() })
