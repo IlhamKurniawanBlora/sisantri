@@ -8,26 +8,13 @@ export default defineEventHandler(async () => {
       .from('santris')
       .select('*', { count: 'exact', head: true })
 
-    const { count: active } = await client
-      .from('santris')
-      .select('*', { count: 'exact', head: true })
-      .is('deleted_at', null)
-
-    const { count: inactive } = await client
-      .from('santris')
-      .select('*', { count: 'exact', head: true })
-      .not('deleted_at', 'is', null)
-
     const { count: male } = await client
       .from('santris')
       .select('*', { count: 'exact', head: true })
       .eq('gender', 'male')
-      .is('deleted_at', null)
 
     return {
       total: total || 0,
-      active: active || 0,
-      inactive: inactive || 0,
       male: male || 0,
       female: (total || 0) - (male || 0),
     }

@@ -48,7 +48,7 @@
           </UButton>
           <UButton size="lg" variant="outline" to="/blogs">
             <UIcon name="i-lucide-newspaper" class="mr-2" />
-            Baca Berita
+            Lihat Berita
           </UButton>
         </div>
       </div>

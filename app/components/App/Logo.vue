@@ -1,5 +1,5 @@
 <template>
-  <div class="logo flex items-center gap-2">
+  <NuxtLink to="/" class="logo flex items-center gap-2">
     <!-- gambar logo lebih besar di mobile -->
     <img
       src="/logo.png"
@@ -11,5 +11,5 @@
     <div class="logo-text hidden sm:block text-base sm:text-lg md:text-xl font-semibold leading-tight whitespace-nowrap">
       SiDawam
     </div>
-  </div>
+  </NuxtLink>
 </template>

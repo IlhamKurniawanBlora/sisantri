@@ -59,9 +59,6 @@ const userMenuItems = [
   { label: 'Profile', icon: 'i-lucide-user', onSelect() {
         navigateTo(`/admin/profile`)
       } },
-  { label: 'Pengaturan', icon: 'i-lucide-settings', onSelect() {
-        navigateTo('/admin/settings')
-      } },
   { label: 'Logout', icon: 'i-lucide-log-out', onSelect: handleLogout }
 ]
 </script>

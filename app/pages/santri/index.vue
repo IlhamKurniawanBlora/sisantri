@@ -64,8 +64,12 @@ const clearFilters = () => {
   <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
-          <UIcon name="i-lucide-users" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
+         <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-6">
+           <img
+              src="/logo.png"
+              alt="SiDawam Logo"
+              class="w-10 h-auto sm:w-12 md:w-16 flex-shrink-0"
+            />
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Data Santri <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
