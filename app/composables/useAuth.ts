@@ -8,40 +8,64 @@ import type { SupabaseClient, AuthChangeEvent, Session, User } from '@supabase/s
 export const useAuth = () => {
   // SSR-safe user state
   const user = useState<any | null>('user', () => null)
+  const session = useState<any | null>('session', () => null)
   const { $supabase } = useNuxtApp()
   const supabase = $supabase as SupabaseClient
 
   // Helper: persist user session to localStorage
-  const persistUser = (userObj: any) => {
+  const persistUser = (userObj: any, sessionObj: any = null) => {
     if (process.client) {
       if (userObj) {
         localStorage.setItem('user', JSON.stringify(userObj))
+        if (sessionObj) {
+          localStorage.setItem('session', JSON.stringify(sessionObj))
+        }
       } else {
         localStorage.removeItem('user')
+        localStorage.removeItem('session')
       }
     }
+  }
+
+  // Get current session token for API calls
+  const getAuthHeaders = (): Record<string, string> => {
+    const currentSession = session.value || (process.client && localStorage.getItem('session') ? JSON.parse(localStorage.getItem('session')!) : null)
+    if (currentSession?.access_token) {
+      return {
+        'Authorization': `Bearer ${currentSession.access_token}`
+      }
+    }
+    return {}
   }
 
   // Initialize session and subscribe to auth state changes
   const initSession = async () => {
     // Try restore from localStorage (client only)
     if (process.client) {
-      const stored = localStorage.getItem('user')
-      if (stored) {
+      const storedUser = localStorage.getItem('user')
+      const storedSession = localStorage.getItem('session')
+      if (storedUser) {
         try {
-          user.value = JSON.parse(stored)
+          user.value = JSON.parse(storedUser)
+        } catch {}
+      }
+      if (storedSession) {
+        try {
+          session.value = JSON.parse(storedSession)
         } catch {}
       }
     }
     // Always check with supabase
     const { data } = await supabase.auth.getSession()
     user.value = data.session?.user ?? null
-    persistUser(user.value)
+    session.value = data.session ?? null
+    persistUser(user.value, session.value)
     if (!process.client) return
     if ((window as any)._supabaseAuthSubscribed) return
-    supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-      user.value = session?.user ?? null
-      persistUser(user.value)
+    supabase.auth.onAuthStateChange((_event: AuthChangeEvent, sessionData: Session | null) => {
+      user.value = sessionData?.user ?? null
+      session.value = sessionData ?? null
+      persistUser(user.value, session.value)
     })
     ;(window as any)._supabaseAuthSubscribed = true
   }
@@ -62,7 +86,8 @@ export const useAuth = () => {
     })
     if (error) throw error
     user.value = data.user
-    persistUser(user.value)
+    session.value = data.session
+    persistUser(user.value, session.value)
     return data
   }
 
@@ -74,7 +99,8 @@ export const useAuth = () => {
     })
     if (error) throw error
     user.value = data.user
-    persistUser(user.value)
+    session.value = data.session
+    persistUser(user.value, session.value)
     return data
   }
 
@@ -82,7 +108,8 @@ export const useAuth = () => {
   const logout = async () => {
     await supabase.auth.signOut()
     user.value = null
-    persistUser(null)
+    session.value = null
+    persistUser(null, null)
   }
 
   // Computed: is user logged in
@@ -92,10 +119,16 @@ export const useAuth = () => {
   if (process.client) {
     onMounted(() => {
       if (!user.value) {
-        const stored = localStorage.getItem('user')
-        if (stored) {
+        const storedUser = localStorage.getItem('user')
+        const storedSession = localStorage.getItem('session')
+        if (storedUser) {
           try {
-            user.value = JSON.parse(stored)
+            user.value = JSON.parse(storedUser)
+          } catch {}
+        }
+        if (storedSession) {
+          try {
+            session.value = JSON.parse(storedSession)
           } catch {}
         }
       }
@@ -104,10 +137,12 @@ export const useAuth = () => {
 
   return {
     user,
+    session,
     isLoggedIn,
     initSession,
     register,
     login,
-    logout
+    logout,
+    getAuthHeaders
   }
 }

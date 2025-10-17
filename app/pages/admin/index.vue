@@ -24,8 +24,24 @@ interface Stats {
   activeUsers: number
 }
 
+interface ClassStats {
+  total: number
+  active: number
+  inactive: number
+  withSchedule: number
+  withoutSchedule: number
+}
+
+interface ScheduleStats {
+  total: number
+  active: number
+  inactive: number
+  today: number
+  upcoming: number
+}
+
 const { user } = useAuth()
-const supabase = useNuxtApp().$supabase
+const supabase = (useNuxtApp() as any).$supabase
 
 const userProfile = ref<UserProfile | null>(null)
 const stats = ref<Stats>({
@@ -37,6 +53,20 @@ const stats = ref<Stats>({
   blogsInactive: 0,
   totalViews: 0,
   activeUsers: 0,
+})
+const classStats = ref<ClassStats>({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  withSchedule: 0,
+  withoutSchedule: 0,
+})
+const scheduleStats = ref<ScheduleStats>({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  today: 0,
+  upcoming: 0,
 })
 
 const fetchUserProfile = async () => {
@@ -55,19 +85,35 @@ const fetchUserProfile = async () => {
 
 const fetchStats = async () => {
   try {
-    const [santriStats, blogStats] = await Promise.all([
+    const [santriStats, blogStats, classStatsRes, scheduleStatsRes] = await Promise.all([
       $fetch('/api/santris/stats'),
       $fetch('/api/blogs/stats'),
+      $fetch('/api/classes/stats'),
+      $fetch('/api/schedules/stats'),
     ])
     stats.value = {
       totalSantris: santriStats.total || 0,
-      santrisActive: santriStats.active || 0,
-      santrisInactive: santriStats.inactive || 0,
+      santrisActive: santriStats.santrisActive || 0,
+      santrisInactive: santriStats.santrisInactive || 0,
       totalBlogs: blogStats.total || 0,
       blogsActive: blogStats.active || 0,
       blogsInactive: blogStats.inactive || 0,
       totalViews: 0,
-      activeUsers: santriStats.active || 0,
+      activeUsers: stats.value.activeUsers || 0,
+    }
+    classStats.value = {
+      total: classStatsRes.total || 0,
+      active: classStatsRes.active || 0,
+      inactive: classStatsRes.inactive || 0,
+      withSchedule: classStatsRes.withSchedule || 0,
+      withoutSchedule: classStatsRes.withoutSchedule || 0,
+    }
+    scheduleStats.value = {
+      total: scheduleStatsRes.total || 0,
+      active: scheduleStatsRes.active || 0,
+      inactive: scheduleStatsRes.inactive || 0,
+      today: scheduleStatsRes.today || 0,
+      upcoming: scheduleStatsRes.upcoming || 0,
     }
   } catch (error) {
     console.error('Error fetching stats:', error)
@@ -112,6 +158,7 @@ onMounted(async () => {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Santri Stats -->
       <UCard>
         <div class="flex flex-col gap-2">
           <div class="flex items-center">
@@ -130,6 +177,7 @@ onMounted(async () => {
         </div>
       </UCard>
 
+      <!-- Blog Stats -->
       <UCard>
         <div class="flex flex-col gap-2">
           <div class="flex items-center">
@@ -144,6 +192,44 @@ onMounted(async () => {
           <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
             <span>Aktif: <b class="text-green-600 dark:text-green-400">{{ stats.blogsActive }}</b></span>
             <span>Tidak aktif: <b class="text-red-600 dark:text-red-400">{{ stats.blogsInactive }}</b></span>
+          </div>
+        </div>
+      </UCard>
+
+      <!-- Class Stats -->
+      <UCard>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+              <UIcon name="i-lucide-book" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Kelas</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ classStats.total }}</p>
+            </div>
+          </div>
+          <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+            <span>Aktif: <b class="text-green-600 dark:text-green-400">{{ classStats.active }}</b></span>
+            <span>Tidak aktif: <b class="text-red-600 dark:text-red-400">{{ classStats.inactive }}</b></span>
+          </div>
+        </div>
+      </UCard>
+
+      <!-- Schedule Stats -->
+      <UCard>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center">
+            <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+              <UIcon name="i-lucide-calendar-days" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Jadwal</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ scheduleStats.total }}</p>
+            </div>
+          </div>
+          <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+            <span>Hari ini: <b class="text-blue-600 dark:text-blue-400">{{ scheduleStats.today }}</b></span>
+            <span>Akan datang: <b class="text-orange-600 dark:text-orange-400">{{ scheduleStats.upcoming }}</b></span>
           </div>
         </div>
       </UCard>

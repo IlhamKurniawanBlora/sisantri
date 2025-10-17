@@ -12,11 +12,18 @@ export default defineEventHandler(async () => {
       .from('santris')
       .select('*', { count: 'exact', head: true })
       .eq('gender', 'male')
+    
+    const { count: santrisActive } = await client
+      .from('santris')
+      .select('*', { count: 'exact', head: true })
+      .is('deleted_at', null)
 
     return {
       total: total || 0,
       male: male || 0,
       female: (total || 0) - (male || 0),
+      santrisActive: santrisActive || 0,
+      santrisInactive: (total || 0) - (santrisActive || 0),
     }
   } catch (error: any) {
     console.error('Santris Stats Error:', error)

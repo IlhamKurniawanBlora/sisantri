@@ -95,40 +95,24 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 }
 </script>
 
-<!-- <template>
+<template>
   <div class="px-4 flex flex-col items-center justify-center">
     <UAuthForm
       :schema="schema"
       :fields="fields"
-      title="Register your account"
-      icon="i-lucide-user"
+      title="Daftar Akun Baru"
+      icon="i-lucide-user-plus"
       @submit="onSubmit"
     >
       <template #description>
         Sudah memiliki akun?
-        <ULink to="/login" class="text-primary font-medium">Sign In</ULink>.
+        <ULink to="/login" class="text-primary font-medium">Masuk</ULink>.
+      </template>
+      <template #footer>
+        Kembali ke
+        <ULink to="/" class="text-primary font-medium">Beranda</ULink>.
       </template>
     </UAuthForm>
-  </div>
-</template> -->
-<template>
-  <div class="px-4 min-h-screen flex flex-col items-center justify-center text-center">
-    <div class="max-w-md w-full space-y-6">
-      <div class="space-y-2">
-        <div class="flex justify-center">
-          <UIcon name="i-lucide-user" class="w-12 h-12 text-primary" />
-        </div>
-        <h1 class="text-2xl font-bold">Halaman Tidak Aktif</h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          Fitur register sudah tidak tersedia.  
-          Silakan kembali ke beranda.
-        </p>
-      </div>
-
-      <UButton to="/" color="primary" class="w-full">
-        Kembali ke Beranda
-      </UButton>
-    </div>
   </div>
 </template>
 

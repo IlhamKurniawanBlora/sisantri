@@ -50,8 +50,14 @@ const confirmLogout = async (confirmed: boolean) => {
 
 const sidebarLinks = [
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin', exact: true },
-  { label: 'Berita', icon: 'i-lucide-file-text', to: '/admin/blogs' },
+  { type: 'separator' },
+  { label: 'Pendaftar', icon: 'i-lucide-user-plus', to: '/admin/registrants' },
   { label: 'Santri', icon: 'i-lucide-users', to: '/admin/santris' },
+  { label: 'Kelas', icon: 'i-lucide-book', to: '/admin/classes' },
+  { label: 'Jadwal', icon: 'i-lucide-calendar', to: '/admin/schedules' },
+  { type: 'separator' },
+  { label: 'Berita', icon: 'i-lucide-file-text', to: '/admin/blogs' },
+  { type: 'separator' },
   { label: 'Pengaturan', icon: 'i-lucide-settings', to: '/admin/settings' }
 ]
 

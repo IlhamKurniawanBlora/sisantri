@@ -18,7 +18,8 @@ useHead({
 })
 
 const toast = useToast()
-const supabase = useNuxtApp().$supabase
+const { $supabase } = useNuxtApp()
+const supabase = $supabase as any
 
 const fields = [
   {
@@ -92,10 +93,10 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       icon="i-lucide-lock"
       @submit="onSubmit"
     >
-      <!-- <template #description>
-        Don't have an account?
-        <ULink to="/register" class="text-primary font-medium">Sign up</ULink>.
-      </template> -->
+      <template #description>
+        Belum punya akun?
+        <ULink to="/register" class="text-primary font-medium">Daftar disini</ULink>.
+      </template>
       <template #footer>
         Kembali ke
         <ULink to="/" class="text-primary font-medium">Beranda</ULink>.

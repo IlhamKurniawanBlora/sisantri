@@ -63,7 +63,7 @@ const showConfirmDialog = ref(false)
 const confirmOptions = ref<{
   title: string
   description: string
-  variant: 'danger' | 'info'
+  variant: 'destructive' | 'default'
   action?: () => void
 } | null>(null)
 
@@ -130,7 +130,14 @@ const stats = ref({
 async function fetchSantriStats() {
   try {
     const response = await $fetch('/api/santris/stats')
-    stats.value = response
+    // Map API response to local stats shape used by the UI
+    stats.value = {
+      total: response.total || 0,
+      active: response.santrisActive || 0,
+      inactive: response.santrisInactive || 0,
+      male: response.male || 0,
+      female: response.female || 0
+    }
   } catch (error) {
     console.error('Error fetching santri stats:', error)
     toast.add({
@@ -277,6 +284,15 @@ function getRowItems(row: Row<Santri>) {
         selectedRow.value = santri
         showSlideover.value = true
       }
+    },
+    {
+      label: 'Pilih Kelas',
+      icon: 'i-lucide-book',
+      onSelect() {
+        mode.value = 'edit'
+        selectedRow.value = santri
+        showSlideover.value = true
+      }
     }
   ]
 
@@ -288,7 +304,7 @@ if (!santri.deleted_at) {
       confirmOptions.value = {
         title: 'Hapus Santri',
         description: `Apakah kamu yakin ingin menghapus santri ${santri.full_name}?`,
-        variant: 'danger',
+        variant: 'destructive',
         action: () => deleteSantri(santri.id)
       }
       showConfirmDialog.value = true
@@ -303,7 +319,7 @@ if (!santri.deleted_at) {
       confirmOptions.value = {
         title: 'Pulihkan Santri',
         description: `Apakah kamu yakin ingin memulihkan santri ${santri.full_name}?`,
-        variant: 'info',
+        variant: 'default',
         action: () => restoreSantri(santri.id)
       }
       showConfirmDialog.value = true
@@ -315,7 +331,7 @@ if (!santri.deleted_at) {
       confirmOptions.value = {
         title: 'Hapus Permanen Santri',
         description: `Apakah kamu yakin ingin menghapus permanen santri ${santri.full_name}? Tindakan ini tidak dapat dibatalkan.`,
-        variant: 'danger', // Variasi warna yang lebih tajam untuk tindakan yang tidak dapat dibatalkan
+        variant: 'destructive', // Variasi warna yang lebih tajam untuk tindakan yang tidak dapat dibatalkan
         action: () => deletePermanentSantri(santri.id)
       }
       showConfirmDialog.value = true
@@ -340,7 +356,7 @@ async function deletePermanentSantri(id: string) {
   confirmOptions.value = {
     title: 'Hapus Permanen Santri',
     description: 'Apakah Anda yakin ingin menghapus permanen santri ini? Tindakan ini tidak dapat dibatalkan.',
-    variant: 'danger',
+    variant: 'destructive',
     action: async () => {
       try {
         const response = await $fetch(`/api/santris/${id}/delete-permanent`, { method: 'DELETE' })
@@ -352,8 +368,9 @@ async function deletePermanentSantri(id: string) {
         } else {
           throw new Error(response?.message || 'Gagal menghapus santri permanen')
         }
-      } catch (error) {
-        toast.add({ title: error.message || 'Gagal menghapus permanen santri', color: 'error' })
+      } catch (err: any) {
+        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : 'Gagal menghapus permanen santri'
+        toast.add({ title: message, color: 'error' })
       }
     }
   }
