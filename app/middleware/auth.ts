@@ -2,11 +2,11 @@
 export default defineNuxtRouteMiddleware(() => {
   const { user } = useAuth()
   
-  if (!user.value) {
+  if (user.value) {
     if (process.client) {
       useToast().add({
-        title: 'Login diperlukan',
-        description: 'Anda harus login untuk mengakses halaman ini',
+        title: 'Kamu sudah login',
+        description: 'Anda sudah login dan tidak dapat mengakses halaman ini',
         color: 'info'
       })
     }

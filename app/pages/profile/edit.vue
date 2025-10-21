@@ -141,7 +141,7 @@ const updateProfile = async () => {
               v-model="form.full_name"
               type="text"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="Enter your full name"
             />
           </div>
@@ -155,7 +155,7 @@ const updateProfile = async () => {
               id="phone"
               v-model="form.phone"
               type="tel"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="Enter your phone number"
             />
           </div>
@@ -169,7 +169,7 @@ const updateProfile = async () => {
               id="avatar_url"
               v-model="form.avatar_url"
               type="url"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="https://example.com/avatar.jpg"
             />
             <p class="mt-1 text-sm text-gray-500">
@@ -203,7 +203,7 @@ const updateProfile = async () => {
           <button
             type="submit"
             :disabled="isLoading"
-            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span v-if="isLoading" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">

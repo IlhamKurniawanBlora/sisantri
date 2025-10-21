@@ -4,19 +4,6 @@
 
 <template>
   <div class="space-y-16">
-    <!-- Hero Section -->
-    <!-- <section class="text-center py-16">
-      <div class="max-w-4xl mx-auto">
-        <UIcon name="i-lucide-users" class="h-16 w-16 text-primary-600 mx-auto mb-6" />
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-          Tentang <span class="text-primary-600 dark:text-primary-400">SiDawam</span>
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-          Sistem Informasi Digital untuk Pondok Pesantren Dawam - 
-          Menghubungkan tradisi dengan teknologi modern dalam pengelolaan data santri dan informasi pesantren.
-        </p>
-      </div>
-    </section> -->
 
     <section class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -223,5 +210,21 @@
         </div>
       </div>
     </section>
-  </div>  
+
+    <section class="py-16 bg-gray-50 dark:bg-gray-900 rounded-3xl">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Jadwal Kelas <span class="text-primary-600 dark:text-primary-400">Dawam</span>
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-300">
+            Berikut adalah jadwal kelas terbaru untuk santri Pondok Pesantren Dawam.
+          </p>
+        </div>
+        <ClassesSchedules
+          :limit="20"
+        />
+      </div>
+    </section>
+  </div>
 </template>

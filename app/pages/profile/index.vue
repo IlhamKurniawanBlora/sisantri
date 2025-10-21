@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
+import { onMounted } from 'vue'
 
-// Define interfaces
+// 🔹 Define interfaces
 interface Profile {
   id: string
   email?: string
@@ -32,18 +33,10 @@ interface AuthUser {
   last_sign_in_at?: string
 }
 
-interface ProfileResponse {
-  success: boolean
-  data: {
-    profile: Profile | null
-    santri: Santri | null
-    user: AuthUser | null
-  }
-}
+// 🔹 Ambil dari useAuth
+const { user, profile, isLoggedIn, initSession, fetchProfile } = useAuth()
 
-const { user, isLoggedIn } = useAuth()
-
-// Redirect to login if not authenticated
+// 🔹 Redirect ke login jika belum login
 if (!isLoggedIn.value) {
   throw createError({
     statusCode: 401,
@@ -51,34 +44,35 @@ if (!isLoggedIn.value) {
   })
 }
 
-// Meta tags
-useHead({
-  title: 'My Profile - Dashboard',
-  meta: [
-    { name: 'description', content: 'User profile dashboard with personal information and santri data' }
-  ]
-})
+// 🔹 Local states
+const loading = ref(true)
+const errorMessage = ref<string | null>(null)
 
-// Fetch profile data
-const { data: profileData, pending, error, refresh } = await useFetch<ProfileResponse>('/api/profile', {
-  server: true,
-  default: (): ProfileResponse => ({
-    success: false,
-    data: {
-      profile: null,
-      santri: null,
-      user: null
+// 🔹 Santri state (kalau nanti ingin fetch data santri)
+const santri = ref<Santri | null>(null)
+
+// 🔹 Load data saat mounted
+onMounted(async () => {
+  try {
+    await initSession()
+    if (!profile.value && user.value) {
+      await fetchProfile()
     }
-  })
+
+    // Contoh: kalau nanti mau fetch santri berdasar user_id
+    // const { data, error } = await $fetch(`/api/santri?user_id=${user.value.id}`)
+    // if (data) santri.value = data
+
+  } catch (err: any) {
+    console.error('Error loading profile:', err)
+    errorMessage.value = err.message || 'Gagal memuat data profil.'
+  } finally {
+    loading.value = false
+  }
 })
 
-// Reactive data
-const profile = computed(() => profileData.value?.data?.profile || null)
-const santri = computed(() => profileData.value?.data?.santri || null)
-const authUser = computed(() => profileData.value?.data?.user || null)
-
-// Format date function
-const formatDate = (dateString: string | undefined) => {
+// 🔹 Format date function
+const formatDate = (dateString?: string) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('id-ID', {
     year: 'numeric',
@@ -87,8 +81,8 @@ const formatDate = (dateString: string | undefined) => {
   })
 }
 
-// Format time function
-const formatDateTime = (dateString: string | undefined) => {
+// 🔹 Format date-time function
+const formatDateTime = (dateString?: string) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleString('id-ID', {
     year: 'numeric',
@@ -110,7 +104,7 @@ const formatDateTime = (dateString: string | undefined) => {
 
     <!-- Loading State -->
     <div v-if="pending" class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
     </div>
 
     <!-- Error State -->
@@ -136,7 +130,7 @@ const formatDateTime = (dateString: string | undefined) => {
         <div class="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
-            <button class="text-blue-600 hover:text-blue-800 font-medium">
+            <button class="text-green-600 hover:text-green-800 font-medium">
               Edit Profile
             </button>
           </div>
@@ -274,7 +268,7 @@ const formatDateTime = (dateString: string | undefined) => {
             </p>
             <NuxtLink 
               to="/register-santri" 
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
             >
               Register as Santri
             </NuxtLink>
@@ -296,7 +290,7 @@ const formatDateTime = (dateString: string | undefined) => {
         <NuxtLink 
           v-if="!santri"
           to="/register-santri" 
-          class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
         >
           Register as Santri
         </NuxtLink>

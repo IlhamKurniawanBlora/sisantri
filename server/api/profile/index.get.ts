@@ -3,9 +3,6 @@ import { serverSupabase } from '../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   try {
-    // Try to use client-aware supabase for user authentication
-    
-    // Get user session from client token
     const { data: { user }, error: authError } = await serverSupabase().auth.getUserByCookie(event.req, event.res)    
     if (authError || !user) {
       throw createError({
@@ -14,10 +11,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Use server supabase for database operations
     const supabase = serverSupabase()
 
-    // Get user profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -31,14 +26,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get santri data related to this user
-    // Since santris table doesn't have user_id, we'll try to match by email in profile name/data
     let santriData = null
     const profileEmail = profile?.email || user.email
     
     if (profileEmail) {
-      // Try to find santri data - could match by name or other criteria
-      // For now, let's check if there's any santri data that might belong to this user
       const { data: santris, error: santriError } = await supabase
         .from('santris')
         .select('*')
@@ -48,13 +39,10 @@ export default defineEventHandler(async (event) => {
       if (santriError && santriError.code !== 'PGRST116') {
         console.warn('Santri data fetch warning:', santriError.message)
       } else if (santris && santris.length > 0) {
-        // For now, we'll take the first available santri data
-        // In a real app, you'd want a proper relationship or matching logic
         santriData = santris[0]
       }
     }
 
-    // If no profile exists, create basic profile from auth user
     let finalProfile = profile
     if (!profile) {
       const newProfile = {

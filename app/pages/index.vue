@@ -91,6 +91,21 @@ const stats = [
     <!-- Stats Section -->
     <SantriPreview class="py-16" />
     <BlogPreview class="py-16" />
+    <section class="py-16 bg-gray-50 dark:bg-gray-900 rounded-3xl">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Jadwal Kelas <span class="text-primary-600 dark:text-primary-400">Dawam</span>
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-300">
+            Berikut adalah jadwal kelas terbaru untuk santri Pondok Pesantren Dawam.
+          </p>
+        </div>
+        <ClassesSchedules
+          :limit="20"
+        />
+      </div>
+    </section>
 
     <!-- CTA Section -->
     <section class="py-16 text-center">
