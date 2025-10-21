@@ -7,7 +7,7 @@ const { login, user, initSession } = useAuth()
 definePageMeta({
   layout: 'blank',
   title: 'Login SiDawam',
-  middleware: 'guest', 
+  middleware: 'auth', 
 })
 
 useHead({

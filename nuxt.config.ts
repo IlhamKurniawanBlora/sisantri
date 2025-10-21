@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     // Public keys (accessible on client)
     public: {
       supabaseUrl: process.env.SUPABASE_URL || '',
-      supabaseKey: process.env.SUPABASE_ANON_KEY || '', // gunakan konsisten nama ini
+      supabaseKey: process.env.SUPABASE_KEY || '', // gunakan konsisten nama ini
     },
   },
 
