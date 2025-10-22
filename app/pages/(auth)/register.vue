@@ -6,7 +6,7 @@ const { register, initSession } = useAuth()
 
 definePageMeta({
   layout: 'blank',
-  middleware: 'guest',
+  middleware: 'auth',
 })
 
 useHead({

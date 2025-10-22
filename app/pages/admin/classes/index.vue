@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, h, resolveComponent, computed, watch, onMounted } from 'vue'
+import { h, resolveComponent, onMounted } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Row } from '@tanstack/vue-table'
 import ClassFormContent from '~/components/Admin/Class/Form.vue'
 import ClassDetailContent from '~/components/Admin/Class/Detail.vue'
+import type { Class } from '~/composables/useClassManagement'
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -17,192 +18,38 @@ const UPagination = resolveComponent('UPagination')
 const UIcon = resolveComponent('UIcon')
 const USlideover = resolveComponent('USlideover')
 const UModal = resolveComponent('UModal')
-const toast = useToast()
 
-type Class = {
-  id: string
-  name: string
-  image_url?: string | null
-  created_at: string
-  updated_at: string
-  deleted_at?: string
-  schedules?: {
-    id: string
-    name: string
-    description: string
-    start_at: string
-    end_at: string
-  }
-}
-
-// State management
-const data = ref<Class[]>([])
-const loading = ref(false)
-const page = ref(1)
-const limit = ref(10)
-const search = ref('')
-const sortBy = ref('newest')
-const includeDeleted = ref(false)
-const total = ref(0)
-
-// Modal states
-const showSlideover = ref(false)
-const mode = ref<'add' | 'edit'>('add')
-const selectedRow = ref<Class | null>(null)
-const showDetailModal = ref(false)
-
-// Confirm dialog state
-const showConfirmDialog = ref(false)
-const confirmOptions = ref<{
-  title: string
-  description: string
-  variant?: 'destructive' | 'default'
-  action?: () => Promise<void>
-}>()
-
-// Stats
-const stats = ref({
-  total: 0,
-  active: 0,
-  inactive: 0,
-  withSchedule: 0,
-  withoutSchedule: 0,
-})
-
-// Open confirm dialog
-function openConfirmDialog(opts: {
-  title: string
-  description: string
-  variant?: 'destructive' | 'default'
-  action: () => Promise<void>
-}) {
-  confirmOptions.value = opts
-  showConfirmDialog.value = true
-}
-
-// Delete Class
-function requestDeleteClass(classItem: Class) {
-  openConfirmDialog({
-    title: 'Hapus Kelas',
-    description: `Apakah Anda yakin ingin menghapus kelas "${classItem.name}"?`,
-    variant: 'destructive',
-    action: async () => {
-      try {
-        await $fetch(`/api/classes/${classItem.id}/delete`, { method: 'DELETE' })
-        toast.add({ title: 'Kelas berhasil dihapus!', color: 'success', icon: 'i-lucide-trash' })
-        fetchClasses()
-      } catch (error) {
-        toast.add({ title: 'Gagal menghapus kelas', color: 'error' })
-      }
-    }
-  })
-}
-
-function requestDeletePermanentClass(classItem: Class) {
-  openConfirmDialog({
-    title: 'Hapus Permanen Kelas',
-    description: `Apakah Anda yakin ingin menghapus permanen kelas "${classItem.name}"?`,
-    variant: 'destructive',
-    action: async () => {
-      try {
-        await $fetch(`/api/classes/${classItem.id}/delete-permanent`, { method: 'DELETE' })
-        toast.add({ title: 'Kelas berhasil dihapus permanen!', color: 'success', icon: 'i-lucide-trash' })
-        fetchClasses()
-      } catch (error) {
-        toast.add({ title: 'Gagal menghapus kelas', color: 'error' })
-      }
-    }
-  })
-}
-
-// Restore Class
-function requestRestoreClass(classItem: Class) {
-  openConfirmDialog({
-    title: 'Pulihkan Kelas',
-    description: `Apakah Anda yakin ingin memulihkan kelas "${classItem.name}"?`,
-    variant: 'default',
-    action: async () => {
-      try {
-        await $fetch(`/api/classes/${classItem.id}/restore`, { method: 'POST' })
-        toast.add({ title: 'Kelas berhasil dipulihkan!', color: 'success', icon: 'i-lucide-undo-2' })
-        fetchClasses()
-      } catch (error) {
-        toast.add({ title: 'Gagal memulihkan kelas', color: 'error' })
-      }
-    }
-  })
-}
-
-// Debounced search
-const debouncedSearch = ref('')
-let searchTimeout: NodeJS.Timeout
-
-const debounceSearch = (value: string) => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    debouncedSearch.value = value
-  }, 500)
-}
-
-watch(search, (newValue) => {
-  debounceSearch(newValue)
-})
-
-watch([debouncedSearch, includeDeleted, sortBy], () => {
-  page.value = 1
-  fetchClasses()
-})
-
-async function fetchClasses() {
-  try {
-    loading.value = true
-    const params = new URLSearchParams({
-      page: page.value.toString(),
-      limit: limit.value.toString(),
-      sortBy: sortBy.value,
-      includeDeleted: includeDeleted.value.toString(),
-    })
-    
-    if (debouncedSearch.value) params.append('search', debouncedSearch.value)
-
-    const response = await $fetch(`/api/classes?${params.toString()}`)
-    data.value = response.data || []
-    total.value = response.pagination?.total || 0
-
-    await fetchStats()
-  } catch (error) {
-    console.error('Gagal memuat kelas:', error)
-    toast.add({
-      title: 'Error',
-      description: 'Gagal memuat data kelas',
-      color: 'error'
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchStats() {
-  try {
-    const response = await $fetch('/api/classes/stats')
-    stats.value = {
-      total: response.total || 0,
-      active: response.active || 0,
-      inactive: response.inactive || 0,
-      withSchedule: response.withSchedule || 0,
-      withoutSchedule: response.withoutSchedule || 0,
-    }
-  } catch (error) {
-    console.error('Gagal memuat statistik:', error)
-  }
-}
+// Use class management composable
+const {
+  data,
+  loading,
+  isSearching,
+  page,
+  limit,
+  search,
+  sortBy,
+  includeDeleted,
+  total,
+  showSlideover,
+  mode,
+  selectedRow,
+  showDetailModal,
+  showConfirmDialog,
+  confirmOptions,
+  stats,
+  fetchClasses,
+  requestDeleteClass,
+  requestDeletePermanentClass,
+  requestRestoreClass,
+  clearFilters,
+  handleClassSaved,
+  openAddClass,
+  openEditClass,
+  openDetailClass,
+} = useClassManagement()
 
 onMounted(async () => {
   await fetchClasses()
-})
-
-watch(page, () => {
-  fetchClasses()
 })
 
 const sortOptions = [
@@ -212,7 +59,9 @@ const sortOptions = [
   { label: 'Nama Z-A', value: 'name_desc' }
 ]
 
-// Table columns
+/**
+ * Build table columns
+ */
 const columns: TableColumn<Class>[] = [
   {
     accessorKey: 'name',
@@ -220,24 +69,10 @@ const columns: TableColumn<Class>[] = [
     cell: ({ row }) => {
       const classItem = row.original
       return h('div', { class: 'min-w-0' }, [
-        h('div', { 
+        h('div', {
           class: 'font-medium text-gray-900 dark:text-white truncate max-w-xs',
-          title: classItem.name 
+          title: classItem.name
         }, classItem.name)
-      ])
-    }
-  },
-  {
-    accessorKey: 'schedules',
-    header: 'Jadwal',
-    cell: ({ row }) => {
-      const schedule = row.original.schedules
-      if (!schedule) {
-        return h('span', { class: 'text-gray-500 dark:text-gray-400' }, '-')
-      }
-      return h('div', [
-        h('div', { class: 'font-medium text-gray-900 dark:text-white' }, schedule.name),
-        h('div', { class: 'text-sm text-gray-500 dark:text-gray-400' }, schedule.description)
       ])
     }
   },
@@ -278,7 +113,7 @@ const columns: TableColumn<Class>[] = [
         h(
           UDropdownMenu,
           {
-            items: getRowItems(row),
+            items: buildRowActions(row),
             'aria-label': 'Actions dropdown',
             content: { align: 'end' }
           },
@@ -294,8 +129,10 @@ const columns: TableColumn<Class>[] = [
   }
 ]
 
-// Row actions
-function getRowItems(row: Row<Class>) {
+/**
+ * Build row action menu items
+ */
+function buildRowActions(row: Row<Class>) {
   const classItem = row.original
 
   const items = [
@@ -303,20 +140,13 @@ function getRowItems(row: Row<Class>) {
     {
       label: 'Detail',
       icon: 'i-lucide-eye',
-      onSelect() {
-        selectedRow.value = classItem
-        showDetailModal.value = true
-      }
+      onSelect: () => openDetailClass(classItem)
     },
     { type: 'separator' },
     {
       label: 'Edit',
       icon: 'i-lucide-pencil',
-      onSelect() {
-        mode.value = 'edit'
-        selectedRow.value = classItem
-        showSlideover.value = true
-      }
+      onSelect: () => openEditClass(classItem)
     }
   ]
 
@@ -340,23 +170,6 @@ function getRowItems(row: Row<Class>) {
 
   return items
 }
-
-const clearFilters = () => {
-  search.value = ''
-  debouncedSearch.value = ''
-  sortBy.value = 'newest'
-  page.value = 1
-}
-
-// Handle form save
-const handleClassSaved = () => {
-  showSlideover.value = false
-  fetchClasses()
-  toast.add({
-    title: mode.value === 'add' ? 'Kelas berhasil ditambahkan!' : 'Kelas berhasil diubah!',
-    color: 'success'
-  })
-}
 </script>
 
 <template>
@@ -375,7 +188,7 @@ const handleClassSaved = () => {
       <UButton
         icon="i-lucide-plus"
         size="sm"
-        @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }"
+        @click="openAddClass"
       >
         Tambah Kelas
       </UButton>
@@ -469,7 +282,7 @@ const handleClassSaved = () => {
             icon="i-lucide-search"
             placeholder="Cari nama kelas..."
             :trailing="search ? true : false"
-            :loading="loading"
+            :loading="isSearching"
           >
             <template v-if="search" #trailing>
               <UButton
@@ -524,8 +337,8 @@ const handleClassSaved = () => {
           {{ search ? 'Kelas Tidak Ditemukan' : 'Belum Ada Kelas' }}
         </h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-          {{ search 
-            ? `Tidak ditemukan kelas yang sesuai dengan pencarian "${search}"` 
+          {{ search
+            ? `Tidak ditemukan kelas yang sesuai dengan pencarian "${search}"`
             : 'Belum ada kelas yang dibuat. Mulai dengan menambahkan kelas pertama.'
           }}
         </p>
@@ -534,7 +347,7 @@ const handleClassSaved = () => {
             <UIcon name="i-lucide-refresh-cw" class="mr-2" />
             Reset Pencarian
           </UButton>
-          <UButton @click="() => { mode = 'add'; selectedRow = null; showSlideover = true }">
+          <UButton @click="openAddClass">
             <UIcon name="i-lucide-plus" class="mr-2" />
             Tambah Kelas
           </UButton>

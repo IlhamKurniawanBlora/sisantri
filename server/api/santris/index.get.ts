@@ -31,6 +31,7 @@ export default defineEventHandler(async (event) => {
     let supabaseQuery = supabase
       .from('santris')
       .select('*', { count: 'exact' })
+      .not('accepted_at', 'is', null)
 
     // Hanya ambil yang belum dihapus jika includeDeleted = false
     if (!includeDeleted) {

@@ -180,7 +180,7 @@ watch(() => [props.limit, props.search], () => {
         class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-300"
       >
         <!-- Class Header with Image -->
-        <div class="relative h-48 bg-gradient-to-br from-blue-500 to-blue-600 overflow-hidden">
+        <div class="relative h-48 bg-gradient-to-br from-green-500 to-green-600 overflow-hidden">
           <img
             v-if="classItem.image_url"
             :src="classItem.image_url"
@@ -188,7 +188,7 @@ watch(() => [props.limit, props.search], () => {
             class="w-full h-full object-cover"
           />
           <div v-else class="w-full h-full flex items-center justify-center">
-            <UIcon name="i-heroicons-book-open" class="w-16 h-16 text-blue-200 opacity-50" />
+            <UIcon name="i-heroicons-book-open" class="w-16 h-16 text-green-200 opacity-50" />
           </div>
 
           <!-- Class Name Overlay -->
@@ -314,7 +314,7 @@ watch(() => [props.limit, props.search], () => {
               <div
                 v-for="schedule in selectedClass.schedules"
                 :key="schedule.id"
-                class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                class="p-4 bg-gradient-to-r from-green-50 to-indigo-50 dark:from-green-950/20 dark:to-indigo-950/20 rounded-lg border border-green-200 dark:border-green-800"
               >
                 <div class="flex items-start justify-between mb-3">
                   <h4 class="font-semibold text-gray-900 dark:text-white">
@@ -343,7 +343,7 @@ watch(() => [props.limit, props.search], () => {
                   </div>
                 </div>
 
-                <div v-if="schedule.description" class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                <div v-if="schedule.description" class="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                   <p class="text-sm text-gray-600 dark:text-gray-300">
                     {{ schedule.description }}
                   </p>

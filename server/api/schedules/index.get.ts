@@ -5,6 +5,7 @@ interface ScheduleQuery {
   limit?: number | string
   search?: string
   date?: string
+  classesId?: string
   includeDeleted?: boolean | string | number
   sortBy?: 'newest' | 'oldest' | 'name_asc' | 'name_desc' | 'start_time' | 'end_time'
 }
@@ -23,6 +24,7 @@ export default defineEventHandler(async (event) => {
     // ✅ Filters
     const search = query.search?.trim() || ''
     const date = query.date?.trim() || ''
+    const classesId = query.classesId?.trim() || ''
     const sortBy = query.sortBy || 'newest'
     const includeDeleted =
       query.includeDeleted === true ||
@@ -63,6 +65,11 @@ export default defineEventHandler(async (event) => {
       supabaseQuery = supabaseQuery
         .gte('start_at', startDate.toISOString())
         .lte('start_at', endDate.toISOString())
+    }
+
+    // ✅ Classes filter (untuk jadwal yang terhubung dengan kelas tertentu)
+    if (classesId) {
+      supabaseQuery = supabaseQuery.contains('classes', { id: classesId })
     }
 
     // ✅ Sorting
@@ -111,6 +118,7 @@ export default defineEventHandler(async (event) => {
       filters: {
         search: search || null,
         date: date || null,
+        classesId: classesId || null,
         sortBy,
         includeDeleted
       }

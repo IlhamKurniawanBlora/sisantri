@@ -7,16 +7,18 @@ export default defineEventHandler(async () => {
     const { count: total } = await client
       .from('santris')
       .select('*', { count: 'exact', head: true })
+      .not('accepted_at', 'is', null)
 
     const { count: male } = await client
       .from('santris')
       .select('*', { count: 'exact', head: true })
       .eq('gender', 'male')
+      .not('accepted_at', 'is', null)
     
     const { count: santrisActive } = await client
       .from('santris')
       .select('*', { count: 'exact', head: true })
-      .is('deleted_at', null)
+      .not('accepted_at', 'is', null)
 
     return {
       total: total || 0,

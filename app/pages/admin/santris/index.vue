@@ -24,22 +24,35 @@ const toast = useToast()
 const { copy } = useClipboard()
 
 type Santri = {
+  idx?: number
   id: string
   nis: string
   full_name: string
   gender: 'male' | 'female'
-  birth_date?: string
-  birth_place?: string
   image_url?: string | null
   address: string
-  phone?: string
-  parent_name?: string
-  parent_phone?: string
-  class_level?: string
-  status?: 'active' | 'graduated' | 'dropped_out' | 'inactive'
   created_at: string
   updated_at: string
   deleted_at?: string | null
+  birth_place_date?: string
+  phone_number?: string
+  nik?: string
+  no_kk?: string
+  nisn?: string
+  no_kip?: string
+  no_pkh?: string
+  no_kks?: string
+  rt_rw?: string
+  kecamatan?: string
+  kabupaten?: string
+  provinsi?: string
+  kode_pos?: string
+  pendidikan_sd?: string
+  pendidikan_smp?: string
+  pendidikan_sma?: string
+  pendidikan_non_formal?: string
+  hafal_quran?: string
+  accepted_at?: string | null
 }
 
 // State management
@@ -196,9 +209,43 @@ const columns: TableColumn<Santri>[] = [
     }
   },
   {
+    accessorKey: 'phone_number',
+    header: 'No. Telepon',
+    cell: ({ row }) => h('span', {}, row.original.phone_number || '-')
+  },
+  {
+    accessorKey: 'nik',
+    header: 'NIK',
+    cell: ({ row }) => h('span', { class: 'font-mono text-xs' }, row.original.nik || '-')
+  },
+  {
     accessorKey: 'address',
     header: 'Alamat',
     cell: ({ row }) => h('span', { class: 'truncate max-w-xs', title: row.original.address }, row.original.address || '-')
+  },
+  {
+    accessorKey: 'kecamatan',
+    header: 'Kecamatan',
+    cell: ({ row }) => h('span', {}, row.original.kecamatan || '-')
+  },
+  {
+    accessorKey: 'kabupaten',
+    header: 'Kabupaten',
+    cell: ({ row }) => h('span', {}, row.original.kabupaten || '-')
+  },
+  {
+    accessorKey: 'birth_place_date',
+    header: 'Tempat & Tgl Lahir',
+    cell: ({ row }) => h('span', { class: 'text-sm' }, row.original.birth_place_date || '-')
+  },
+  {
+    accessorKey: 'pendidikan_sma',
+    header: 'Pendidikan Terakhir',
+    cell: ({ row }) => {
+      const santri = row.original
+      const pendidikan = santri.pendidikan_sma || santri.pendidikan_smp || santri.pendidikan_sd || '-'
+      return h('span', { class: 'text-sm' }, pendidikan)
+    }
   },
   {
     accessorKey: 'status',
@@ -229,7 +276,7 @@ const columns: TableColumn<Santri>[] = [
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: 'Aksi',
     cell: ({ row }) =>
       h(
         'div',

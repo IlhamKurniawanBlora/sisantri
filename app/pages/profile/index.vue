@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '~/composables/useAuth'
-import { onMounted } from 'vue'
+import { useNuxtApp, useToast } from '#imports'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // 🔹 Define interfaces
 interface Profile {
@@ -23,7 +25,24 @@ interface Santri {
   accepted_at?: string
   created_at?: string
   updated_at?: string
-  user_id?: string
+  birth_place_date?: string
+  phone_number?: string
+  nik?: string
+  nisn?: string
+  no_kk?: string
+  no_kip?: string
+  no_kks?: string
+  no_pkh?: string
+  rt_rw?: string
+  kecamatan?: string
+  kabupaten?: string
+  provinsi?: string
+  kode_pos?: string
+  pendidikan_sd?: string
+  pendidikan_smp?: string
+  pendidikan_sma?: string
+  pendidikan_non_formal?: string
+  hafal_quran?: string
 }
 
 interface AuthUser {
@@ -34,7 +53,9 @@ interface AuthUser {
 }
 
 // 🔹 Ambil dari useAuth
-const { user, profile, isLoggedIn, initSession, fetchProfile } = useAuth()
+const { user, profile, isLoggedIn } = useAuth()
+const supabase = useNuxtApp().$supabase as SupabaseClient
+const toast = useToast()
 
 // 🔹 Redirect ke login jika belum login
 if (!isLoggedIn.value) {
@@ -45,31 +66,11 @@ if (!isLoggedIn.value) {
 }
 
 // 🔹 Local states
-const loading = ref(true)
-const errorMessage = ref<string | null>(null)
+const loading = ref(false)
+const avatarPreview = ref<string | null>(null)
 
-// 🔹 Santri state (kalau nanti ingin fetch data santri)
+// 🔹 Santri state
 const santri = ref<Santri | null>(null)
-
-// 🔹 Load data saat mounted
-onMounted(async () => {
-  try {
-    await initSession()
-    if (!profile.value && user.value) {
-      await fetchProfile()
-    }
-
-    // Contoh: kalau nanti mau fetch santri berdasar user_id
-    // const { data, error } = await $fetch(`/api/santri?user_id=${user.value.id}`)
-    // if (data) santri.value = data
-
-  } catch (err: any) {
-    console.error('Error loading profile:', err)
-    errorMessage.value = err.message || 'Gagal memuat data profil.'
-  } finally {
-    loading.value = false
-  }
-})
 
 // 🔹 Format date function
 const formatDate = (dateString?: string) => {
@@ -92,215 +93,302 @@ const formatDateTime = (dateString?: string) => {
     minute: '2-digit'
   })
 }
+
+// 🔹 Load data saat mounted
+onMounted(async () => {
+  try {
+    loading.value = true
+    
+    if (!user.value) return
+
+    // Fetch profile dengan santri_id
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url, santri_id')
+      .eq('id', user.value.id)
+      .single()
+
+    if (profileError) throw profileError
+
+    if (profileData) {
+      if (profileData.avatar_url) {
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(profileData.avatar_url)
+        avatarPreview.value = urlData.publicUrl
+      }
+
+      // Fetch santri data jika santri_id ada di profile
+      if (profileData.santri_id) {
+        const { data: santriData, error: santriError } = await supabase
+          .from('santris')
+          .select('*')
+          .eq('id', profileData.santri_id)
+          .single()
+        
+        if (santriData) {
+          santri.value = santriData
+        }
+      }
+    }
+
+  } catch (err: any) {
+    console.error('Error loading profile:', err)
+    toast.add({ 
+      title: 'Error', 
+      description: err.message || 'Gagal memuat data profil', 
+      color: 'error' 
+    })
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-      <p class="text-gray-600">Manage your personal information and view your santri data</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <UIcon name="i-lucide-user" class="w-6 h-6" />
+        Profil Saya
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Kelola informasi profil dan lihat data santri Anda
+      </p>
     </div>
 
     <!-- Loading State -->
-    <div v-if="pending" class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-      <div class="flex items-center">
-        <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-        <p class="text-red-800">Failed to load profile data. Please try again.</p>
-      </div>
-      <button 
-        @click="refresh()" 
-        class="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-      >
-        Retry
-      </button>
+    <div v-if="loading" class="flex justify-center items-center py-12">
+      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-primary" />
     </div>
 
     <!-- Content -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Profile Information -->
       <div class="lg:col-span-2">
-        <div class="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
-            <button class="text-green-600 hover:text-green-800 font-medium">
-              Edit Profile
-            </button>
-          </div>
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-user-circle" class="w-5 h-5 text-primary" />
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  Informasi Profil
+                </h2>
+              </div>
+              <UButton 
+                to="/profile/edit"
+                variant="outline" 
+                size="sm"
+                icon="i-lucide-edit"
+              >
+                Edit
+              </UButton>
+            </div>
+          </template>
 
           <div class="space-y-6">
-            <!-- Avatar -->
-            <div class="flex items-center space-x-4">
-              <div class="h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-                <img 
-                  v-if="profile?.avatar_url" 
-                  :src="profile.avatar_url" 
-                  :alt="profile.full_name || 'User Avatar'"
-                  class="h-full w-full object-cover"
-                />
-                <svg v-else class="h-10 w-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
-              </div>
+            <!-- Avatar & Name -->
+            <div class="flex items-center gap-4">
+              <UAvatar
+                :src="avatarPreview || undefined"
+                :alt="profile?.full_name || 'User Avatar'"
+                size="lg"
+                class="ring-4 ring-gray-100 dark:ring-gray-800"
+              />
               <div>
-                <h3 class="text-lg font-medium text-gray-900">
-                  {{ profile?.full_name || 'No name set' }}
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ profile?.full_name || 'Belum ada nama' }}
                 </h3>
-                <p class="text-gray-500">{{ profile?.email || authUser?.email }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ user?.email }}
+                </p>
               </div>
             </div>
+
+            <UDivider />
 
             <!-- Profile Details -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <p class="text-gray-900">{{ profile?.full_name || '-' }}</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ profile?.full_name || '-' }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <p class="text-gray-900">{{ profile?.email || authUser?.email || '-' }}</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ user?.email || '-' }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <p class="text-gray-900">{{ profile?.phone || '-' }}</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Telepon</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ profile?.phone || '-' }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Member Since</label>
-                <p class="text-gray-900">{{ formatDate(authUser?.created_at || profile?.created_at) }}</p>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Last Login</label>
-                <p class="text-gray-900">{{ formatDateTime(authUser?.last_sign_in_at) }}</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Bergabung Sejak</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ formatDate(user?.created_at) }}</p>
               </div>
             </div>
           </div>
-        </div>
+        </UCard>
       </div>
 
       <!-- Santri Information -->
       <div class="lg:col-span-1">
-        <div class="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">Santri Information</h2>
-          
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-book-open" class="w-5 h-5 text-primary" />
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  Data Santri
+                </h2>
+              </div>
+              <UButton 
+                v-if="santri"
+                :to="`/profile/edit-santri/${santri.id}`"
+                variant="outline" 
+                size="sm"
+                icon="i-lucide-edit"
+              >
+                Edit
+              </UButton>
+            </div>
+          </template>
+
           <div v-if="santri" class="space-y-4">
             <!-- Santri Photo -->
-            <div class="flex justify-center mb-4">
-              <div class="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-                <img 
-                  v-if="santri.image_url" 
-                  :src="santri.image_url" 
-                  :alt="santri.full_name"
-                  class="h-full w-full object-cover"
-                />
-                <svg v-else class="h-12 w-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
-              </div>
+            <div class="flex justify-center">
+              <UAvatar
+                :src="santri.image_url || undefined"
+                :alt="santri.full_name || 'Santri Avatar'"
+                size="xl"
+                class="ring-4 ring-gray-100 dark:ring-gray-800"
+              />
             </div>
 
             <!-- Santri Details -->
             <div class="space-y-3">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">NIS</label>
-                <p class="text-gray-900 font-mono">{{ santri.nis || '-' }}</p>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">NIS</p>
+                <p class="text-gray-900 dark:text-white font-mono mt-1">{{ santri.nis || '-' }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <p class="text-gray-900">{{ santri.full_name || '-' }}</p>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Nama</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ santri.full_name || '-' }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                <p class="text-gray-900 capitalize">{{ santri.gender || '-' }}</p>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Jenis Kelamin</p>
+                <p class="text-gray-900 dark:text-white capitalize mt-1">
+                  {{ santri.gender === 'male' ? 'Laki-laki' : 'Perempuan' }}
+                </p>
+              </div>
+
+              <div v-if="santri.phone_number">
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">No. Telepon</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ santri.phone_number }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <p class="text-gray-900 text-sm">{{ santri.address || '-' }}</p>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Alamat</p>
+                <p class="text-gray-900 dark:text-white text-sm mt-1">{{ santri.address || '-' }}</p>
+              </div>
+
+              <div v-if="santri.kabupaten">
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Kabupaten/Kota</p>
+                <p class="text-gray-900 dark:text-white text-sm mt-1">{{ santri.kabupaten }}</p>
+              </div>
+
+              <div v-if="santri.hafal_quran">
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Hafal Quran</p>
+                <p class="text-gray-900 dark:text-white text-sm mt-1">{{ santri.hafal_quran }}</p>
               </div>
               
+              <div>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Tanggal Pendaftaran</p>
+                <p class="text-gray-900 dark:text-white text-sm mt-1">{{ formatDate(santri.created_at) }}</p>
+              </div>
+              
+              <UDivider v-if="santri.accepted_at" />
+
               <div v-if="santri.accepted_at">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Accepted Date</label>
-                <p class="text-green-600 text-sm">{{ formatDate(santri.accepted_at) }}</p>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Registration Date</label>
-                <p class="text-gray-900 text-sm">{{ formatDate(santri.created_at) }}</p>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Diterima Tanggal</p>
+                <p class="text-green-600 dark:text-green-400 text-sm mt-1 font-medium">
+                  {{ formatDate(santri.accepted_at) }}
+                </p>
               </div>
             </div>
 
             <!-- Status Badge -->
-            <div class="pt-4 border-t border-gray-200">
-              <span 
-                :class="[
-                  'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                  santri.accepted_at 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-yellow-100 text-yellow-800'
-                ]"
-              >
-                {{ santri.accepted_at ? 'Accepted' : 'Pending Review' }}
-              </span>
-            </div>
+            <UDivider />
+            <UBadge 
+              :color="santri.accepted_at ? 'success' : 'warning'"
+              variant="subtle"
+              class="w-full text-center justify-center"
+            >
+              <UIcon 
+                :name="santri.accepted_at ? 'i-lucide-check-circle' : 'i-lucide-clock'" 
+                class="w-4 h-4 mr-1" 
+              />
+              {{ santri.accepted_at ? 'Diterima' : 'Menunggu Review' }}
+            </UBadge>
           </div>
 
           <!-- No Santri Data -->
           <div v-else class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No Santri Data</h3>
-            <p class="text-gray-500 text-sm mb-4">
-              You haven't registered as a santri yet.
+            <UIcon name="i-lucide-inbox" class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Belum ada data santri</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+              Anda belum mendaftar sebagai santri.
             </p>
-            <NuxtLink 
-              to="/register-santri" 
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            <UButton
+              to="/register-santri"
+              color="primary"
+              icon="i-lucide-plus"
+              block
             >
-              Register as Santri
-            </NuxtLink>
+              Daftar Sebagai Santri
+            </UButton>
           </div>
-        </div>
+        </UCard>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="mt-8 bg-gray-50 rounded-lg p-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <NuxtLink 
-          to="/profile/edit" 
-          class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-        >
-          Edit Profile
-        </NuxtLink>
-        <NuxtLink 
-          v-if="!santri"
-          to="/register-santri" 
-          class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-        >
-          Register as Santri
-        </NuxtLink>
-        <button 
-          @click="refresh()" 
-          class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-        >
-          Refresh Data
-        </button>
-      </div>
+    <div class="mt-6">
+      <UCard>
+        <template #header>
+          <div class="flex items-center gap-2">
+            <UIcon name="i-lucide-zap" class="w-5 h-5 text-primary" />
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Aksi Cepat</h3>
+          </div>
+        </template>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <UButton
+            to="/profile/edit"
+            color="primary"
+            variant="soft"
+            icon="i-lucide-edit"
+            block
+          >
+            Edit Profil
+          </UButton>
+          <UButton
+            v-if="!santri"
+            to="/register-santri"
+            color="success"
+            variant="soft"
+            icon="i-lucide-user-plus"
+            block
+          >
+            Daftar Santri
+          </UButton>
+        </div>
+      </UCard>
     </div>
   </div>
 </template>

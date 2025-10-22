@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, h, resolveComponent } from 'vue'
+import ScheduleFormContent from '~/components/Admin/Schedule/Form.vue'
+import ScheduleDetailContent from '~/components/Admin/Schedule/Detail.vue'
 
 const UButton = resolveComponent('UButton')
 const UCard = resolveComponent('UCard')
@@ -31,11 +33,13 @@ interface Schedule {
 
 // State management
 const schedules = ref<Schedule[]>([])
+const classes = ref<Array<{ id: string; name: string }>>([])
 const loading = ref(false)
 const page = ref(1)
 const limit = ref(10)
 const search = ref('')
 const sortBy = ref('newest')
+const classesFilter = ref<string | null>(null)
 const includeDeleted = ref(false)
 const total = ref(0)
 
@@ -160,6 +164,19 @@ function formatDate(date: string) {
   })
 }
 
+// Fetch classes for filter
+async function fetchClasses() {
+  try {
+    const response = await $fetch('/api/classes?limit=1000')
+    classes.value = response.data?.map((c: any) => ({
+      id: c.id,
+      name: c.name
+    })) || []
+  } catch (error) {
+    console.error('Gagal memuat daftar kelas:', error)
+  }
+}
+
 // Fetch schedules
 async function fetchSchedules() {
   try {
@@ -172,6 +189,7 @@ async function fetchSchedules() {
     })
     
     if (search.value) params.append('search', search.value)
+    if (classesFilter.value) params.append('classesId', classesFilter.value)
 
     const response = await $fetch(`/api/schedules?${params.toString()}`)
     schedules.value = response.data || []
@@ -219,6 +237,7 @@ const sortOptions = [
 const clearFilters = () => {
   search.value = ''
   sortBy.value = 'newest'
+  classesFilter.value = null
   includeDeleted.value = false
   page.value = 1
 }
@@ -279,10 +298,11 @@ function getRowItems(schedule: Schedule) {
 }
 
 onMounted(async () => {
+  await fetchClasses()
   await fetchSchedules()
 })
 
-watch([search, sortBy, includeDeleted], () => {
+watch([search, sortBy, includeDeleted, classesFilter], () => {
   page.value = 1
   fetchSchedules()
 })
@@ -418,6 +438,21 @@ watch(page, () => {
 
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-2">
+          <!-- Classes Filter -->
+          <USelect
+            v-model="classesFilter"
+            :items="[
+              { label: 'Semua Kelas', value: null },
+              ...classes.map(c => ({ label: c.name, value: c.id }))
+            ]"
+            placeholder="Filter Kelas"
+            class="w-full sm:w-48"
+          >
+            <template #leading>
+              <UIcon name="i-lucide-book" class="w-4 h-4 text-gray-400" />
+            </template>
+          </USelect>
+
           <USelect
             v-model="sortBy"
             :items="sortOptions"
@@ -436,7 +471,7 @@ watch(page, () => {
           />
 
           <UButton
-            v-if="search || sortBy !== 'newest' || includeDeleted"
+            v-if="search || sortBy !== 'newest' || includeDeleted || classesFilter"
             icon="i-lucide-x"
             color="gray"
             variant="outline"
@@ -556,16 +591,16 @@ watch(page, () => {
                 </p>
               </div>
 
-              <!-- Classes Grid -->
-              <div v-if="schedule.classes && schedule.classes.length > 0" class="grid grid-cols-2 gap-2">
+              <!-- Classes List -->
+              <div v-if="schedule.classes && schedule.classes.length > 0" class="space-y-2">
                 <div
-                  v-for="klass in schedule.classes.slice(0, 4)"
+                  v-for="(klass, index) in schedule.classes.slice(0, 3)"
                   :key="klass.id"
-                  class="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                  class="flex items-center gap-2 text-sm"
                 >
                   <div 
                     v-if="klass.image_url"
-                    class="w-6 h-6 rounded flex-shrink-0 overflow-hidden"
+                    class="w-5 h-5 rounded overflow-hidden flex-shrink-0"
                   >
                     <img 
                       :src="klass.image_url" 
@@ -573,17 +608,17 @@ watch(page, () => {
                       class="w-full h-full object-cover"
                     />
                   </div>
-                  <div v-else class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-600 flex-shrink-0" />
-                  <p class="text-xs text-gray-700 dark:text-gray-300 truncate">
+                  <div v-else class="w-5 h-5 rounded bg-gray-200 dark:bg-gray-600 flex-shrink-0" />
+                  <span class="text-gray-700 dark:text-gray-300 truncate">
                     {{ klass.name }}
-                  </p>
+                  </span>
                 </div>
               </div>
 
               <!-- More Classes Badge -->
-              <div v-if="schedule.classes && schedule.classes.length > 4" class="mt-2">
+              <div v-if="schedule.classes && schedule.classes.length > 3" class="mt-2">
                 <UBadge variant="soft" color="gray" size="sm">
-                  +{{ schedule.classes.length - 4 }} kelas lainnya
+                  +{{ schedule.classes.length - 3 }} kelas lainnya
                 </UBadge>
               </div>
 
@@ -621,7 +656,7 @@ watch(page, () => {
     <!-- Slideover Form -->
     <USlideover v-model:open="showSlideover" :title="mode === 'add' ? 'Tambah Jadwal' : 'Edit Jadwal'">
       <template #body>
-        <ScheduleForm
+        <ScheduleFormContent
           :mode="mode"
           :schedule="selectedSchedule"
           @saved="handleScheduleSaved"
@@ -647,7 +682,7 @@ watch(page, () => {
       </template>
 
       <template #body>
-        <ScheduleDetail
+        <ScheduleDetailContent
           v-if="selectedSchedule"
           :schedule="selectedSchedule"
         />

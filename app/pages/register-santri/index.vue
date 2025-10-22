@@ -17,21 +17,6 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- NIS -->
-              <div>
-                <label for="nis" class="block text-sm font-medium text-gray-700 mb-2">
-                  NIS <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="nis"
-                  v-model="form.nis"
-                  type="text"
-                  placeholder="Misal: ST2024001"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
               <!-- Full Name -->
               <div>
                 <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2">
@@ -440,16 +425,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 
 // Define page meta
 definePageMeta({
   layout: 'default',
-  middleware: 'guest'
+  middleware: 'register-santri'
 })
+
+// Get auth composable
+const { session } = useAuth()
 
 // Form data
 const form = ref({
-  nis: '',
   full_name: '',
   gender: '',
   phone_number: '',
@@ -504,7 +492,6 @@ const submitForm = async () => {
 
     // Create FormData for multipart upload
     const formData = new FormData()
-    formData.append('nis', form.value.nis)
     formData.append('full_name', form.value.full_name)
     formData.append('gender', form.value.gender)
     formData.append('phone_number', form.value.phone_number)
@@ -531,10 +518,19 @@ const submitForm = async () => {
       formData.append('file', selectedFile.value)
     }
 
-    // Submit to API
+    // Get authorization token from session
+    const authToken = session.value?.access_token
+    if (!authToken) {
+      throw new Error('Unauthorized - Please login first')
+    }
+
+    // Submit to API with Authorization header
     const response = await $fetch('/api/registrant', {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
     })
 
     successMessage.value = response.message || 'Pendaftaran Anda telah diterima. Tim admin akan menghubungi Anda segera.'
@@ -555,7 +551,6 @@ const submitForm = async () => {
 // Reset form
 const resetForm = () => {
   form.value = {
-    nis: '',
     full_name: '',
     gender: '',
     phone_number: '',

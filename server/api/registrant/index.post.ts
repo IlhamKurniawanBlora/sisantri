@@ -1,9 +1,31 @@
 // server/api/registrant/index.post.ts
 import type { MultiPartData } from 'h3'
 import { serverSupabase } from '../../utils/supabase'
+import { generateAutoNIS } from '../../utils/santrisService'
 
 export default defineEventHandler(async (event) => {
   try {
+    // --- Get authorization token ---
+    const authHeader = getHeader(event, 'authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized - Please login first'
+      })
+    }
+
+    const token = authHeader.substring(7)
+    const supabase = serverSupabase()
+
+    // --- Get user from token ---
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized - Invalid token'
+      })
+    }
+
     const contentType = getHeader(event, 'content-type') || ''
     let body: any = {}
     let fileBuffer: Buffer | null = null
@@ -31,14 +53,17 @@ export default defineEventHandler(async (event) => {
     }
 
     // --- Validate required fields ---
-    const requiredFields = ['nis', 'full_name', 'gender', 'address']
+    const requiredFields = ['full_name', 'gender', 'address']
     for (const field of requiredFields) {
       if (!body[field]) {
         throw createError({ statusCode: 400, statusMessage: `Field ${field} is required` })
       }
     }
 
-    const supabase = await serverSupabase()
+    // --- Generate NIS otomatis ---
+    const generatedNIS = await generateAutoNIS()
+    body.nis = generatedNIS
+
     let imageUrl: string | null = null
 
     // --- Upload file ke bucket jika ada ---
@@ -105,6 +130,20 @@ export default defineEventHandler(async (event) => {
       .single()
 
     if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+
+    // --- Update user's profile dengan santri_id ---
+    const { error: profileUpdateError } = await supabase
+      .from('profiles')
+      .update({
+        santri_id: data.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id)
+
+    if (profileUpdateError) {
+      console.warn('Failed to update profile with santri_id:', profileUpdateError.message)
+      // Don't throw error, registrant was created successfully
+    }
 
     return { success: true, data, message: 'Registrant created successfully' }
   } catch (error: any) {
