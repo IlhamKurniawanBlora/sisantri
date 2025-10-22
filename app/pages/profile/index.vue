@@ -11,6 +11,8 @@ interface Profile {
   full_name?: string
   avatar_url?: string
   phone?: string
+  classes_id?: string | null
+  santri_id?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -43,6 +45,7 @@ interface Santri {
   pendidikan_sma?: string
   pendidikan_non_formal?: string
   hafal_quran?: string
+  classes_id?: string | null
 }
 
 interface AuthUser {
@@ -50,6 +53,24 @@ interface AuthUser {
   email?: string
   created_at?: string
   last_sign_in_at?: string
+}
+
+interface ClassData {
+  id: string
+  name: string
+  image_url?: string
+  created_at?: string
+  updated_at?: string
+}
+
+interface Schedule {
+  id: string
+  name: string
+  description?: string
+  start_at: string
+  end_at: string
+  classes_id: string
+  created_at?: string
 }
 
 // 🔹 Ambil dari useAuth
@@ -72,6 +93,11 @@ const avatarPreview = ref<string | null>(null)
 // 🔹 Santri state
 const santri = ref<Santri | null>(null)
 
+// 🔹 Class and Schedule state
+const classData = ref<ClassData | null>(null)
+const schedules = ref<Schedule[]>([])
+const loadingClass = ref(false)
+
 // 🔹 Format date function
 const formatDate = (dateString?: string) => {
   if (!dateString) return '-'
@@ -92,6 +118,53 @@ const formatDateTime = (dateString?: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+// 🔹 Format time function
+const formatTime = (dateString?: string) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// 🔹 Fetch class data jika profile memiliki classes_id
+const fetchClassData = async (classesId: string) => {
+  try {
+    loadingClass.value = true
+    
+    // Fetch class info
+    const { data: classInfo, error: classError } = await supabase
+      .from('classes')
+      .select('*')
+      .eq('id', classesId)
+      .single()
+
+    if (classError) throw classError
+    classData.value = classInfo
+
+    // Fetch schedules untuk kelas ini
+    const { data: schedulesData, error: schedulesError } = await supabase
+      .from('schedules')
+      .select('*')
+      .eq('classes_id', classesId)
+      .is('deleted_at', null)
+      .order('start_at', { ascending: true })
+
+    if (schedulesError) throw schedulesError
+    schedules.value = schedulesData || []
+
+  } catch (err: any) {
+    console.error('Error loading class data:', err)
+    toast.add({ 
+      title: 'Error', 
+      description: err.message || 'Gagal memuat data kelas', 
+      color: 'error' 
+    })
+  } finally {
+    loadingClass.value = false
+  }
 }
 
 // 🔹 Load data saat mounted
@@ -128,6 +201,11 @@ onMounted(async () => {
         
         if (santriData) {
           santri.value = santriData
+          
+          // Fetch class data jika classes_id ada di santri
+          if (santriData.classes_id) {
+            await fetchClassData(santriData.classes_id)
+          }
         }
       }
     }
@@ -228,6 +306,122 @@ onMounted(async () => {
               <div>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Bergabung Sejak</p>
                 <p class="text-gray-900 dark:text-white mt-1">{{ formatDate(user?.created_at) }}</p>
+              </div>
+            </div>
+          </div>
+        </UCard>
+        <UCard class="mt-6">
+          <template #header>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide-book" class="w-5 h-5 text-primary" />
+              <h2 class="text-lg font-semibold">
+                Informasi Kelas
+              </h2>
+            </div>
+          </template>
+
+          <div v-if="loadingClass" class="flex justify-center items-center py-8">
+            <UIcon name="i-lucide-loader-2" class="w-6 h-6 animate-spin text-primary" />
+          </div>
+
+          <!-- Classes ID Not Set -->
+          <div v-else-if="!classData" class="space-y-4">
+            <UAlert
+              color="warning"
+              icon="i-lucide-alert-circle"
+              variant="soft"
+            >
+              <template #title>
+                Kelas Belum Ditentukan
+              </template>
+              <template #description>
+                Silahkan hubungi pengurus Pondok Pesantren Dawam untuk menentukan kelas Anda.
+              </template>
+            </UAlert>
+
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Status</p>
+                <UBadge color="warning" variant="subtle" class="mt-2">
+                  <UIcon name="i-lucide-alert-circle" class="w-3 h-3 mr-1" />
+                  Belum Ditentukan
+                </UBadge>
+              </div>
+            </div>
+          </div>
+
+          <!-- Classes Info Available -->
+          <div v-else class="space-y-4">
+            <!-- Class Header -->
+            <div class="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <UAvatar
+                v-if="classData.image_url"
+                :src="classData.image_url"
+                :alt="classData.name"
+                size="md"
+                class="flex-shrink-0"
+              />
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ classData.name }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  ID Kelas: <span class="font-mono">{{ classData.id }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Class Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Nama Kelas</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ classData.name }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Dibuat Tanggal</p>
+                <p class="text-gray-900 dark:text-white mt-1">{{ formatDate(classData.created_at) }}</p>
+              </div>
+            </div>
+
+            <!-- Schedules Section -->
+            <UDivider class="my-4" />
+            
+            <div>
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <UIcon name="i-lucide-clock" class="w-4 h-4" />
+                Jadwal Kelas ({{ schedules.length }})
+              </h4>
+
+              <div v-if="schedules.length > 0" class="space-y-3">
+                <div
+                  v-for="schedule in schedules"
+                  :key="schedule.id"
+                  class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-900 dark:text-white">{{ schedule.name }}</p>
+                      <p v-if="schedule.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {{ schedule.description }}
+                      </p>
+                      <div class="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div class="flex items-center gap-1">
+                          <UIcon name="i-lucide-play" class="w-3 h-3" />
+                          {{ formatTime(schedule.start_at) }}
+                        </div>
+                        <div class="flex items-center gap-1">
+                          <UIcon name="i-lucide-square" class="w-3 h-3" />
+                          {{ formatTime(schedule.end_at) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="text-center py-6 text-gray-500 dark:text-gray-400">
+                <UIcon name="i-lucide-inbox" class="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p class="text-sm">Belum ada jadwal untuk kelas ini</p>
               </div>
             </div>
           </div>

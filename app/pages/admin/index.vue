@@ -54,6 +54,7 @@ const stats = ref<Stats>({
   totalViews: 0,
   activeUsers: 0,
 })
+
 const classStats = ref<ClassStats>({
   total: 0,
   active: 0,
@@ -61,6 +62,7 @@ const classStats = ref<ClassStats>({
   withSchedule: 0,
   withoutSchedule: 0,
 })
+
 const scheduleStats = ref<ScheduleStats>({
   total: 0,
   active: 0,
@@ -68,6 +70,15 @@ const scheduleStats = ref<ScheduleStats>({
   today: 0,
   upcoming: 0,
 })
+
+// 🧭 Navigasi Admin (dibuat dalam const)
+const adminLinks = [
+  { to: '/admin/blogs', label: 'Kelola Berita', icon: 'i-lucide-newspaper' },
+  { to: '/admin/santris', label: 'Kelola Santri', icon: 'i-lucide-users' },
+  { to: '/admin/classes', label: 'Kelola Kelas', icon: 'i-lucide-book' },
+  { to: '/admin/schedules', label: 'Kelola Jadwal', icon: 'i-lucide-calendar-days' },
+  { to: '/admin/settings', label: 'Pengaturan', icon: 'i-lucide-settings' },
+]
 
 const fetchUserProfile = async () => {
   if (!user.value) return
@@ -91,6 +102,7 @@ const fetchStats = async () => {
       $fetch('/api/classes/stats'),
       $fetch('/api/schedules/stats'),
     ])
+
     stats.value = {
       totalSantris: santriStats.total || 0,
       santrisActive: santriStats.santrisActive || 0,
@@ -101,6 +113,7 @@ const fetchStats = async () => {
       totalViews: 0,
       activeUsers: stats.value.activeUsers || 0,
     }
+
     classStats.value = {
       total: classStatsRes.total || 0,
       active: classStatsRes.active || 0,
@@ -108,6 +121,7 @@ const fetchStats = async () => {
       withSchedule: classStatsRes.withSchedule || 0,
       withoutSchedule: classStatsRes.withoutSchedule || 0,
     }
+
     scheduleStats.value = {
       total: scheduleStatsRes.total || 0,
       active: scheduleStatsRes.active || 0,
@@ -131,6 +145,7 @@ onMounted(async () => {
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
     </div>
 
+    <!-- User Info -->
     <div class="mb-8 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center gap-4">
       <UAvatar 
         :src="userProfile?.avatar_url" 
@@ -144,19 +159,20 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- Navigation Buttons -->
     <div class="flex flex-wrap gap-4 mb-8">
-      <NuxtLink to="/admin/blogs">
-        <UButton color="primary" icon="i-lucide-newspaper" size="lg">
-          Kelola Berita
-        </UButton>
-      </NuxtLink>
-      <NuxtLink to="/admin/santris">
-        <UButton color="primary" icon="i-lucide-users" size="lg">
-          Kelola Santri
+      <NuxtLink
+        v-for="(item, i) in adminLinks"
+        :key="i"
+        :to="item.to"
+      >
+        <UButton color="primary" :icon="item.icon" size="lg">
+          {{ item.label }}
         </UButton>
       </NuxtLink>
     </div>
 
+    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <!-- Santri Stats -->
       <UCard>

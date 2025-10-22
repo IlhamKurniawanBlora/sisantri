@@ -5,6 +5,7 @@ import type { Row } from '@tanstack/vue-table'
 import { useClipboard } from '@vueuse/core'
 import SantriFormContent from '~/components/Admin/Santri/Form.vue'
 import SantriDetailContent from '~/components/Admin/Santri/Detail.vue'
+import SelectClassModal from '~/components/Admin/Santri/SelectClassModal.vue'
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -73,6 +74,8 @@ const selectedRow = ref<Santri | null>(null)
 // Modal states
 const showDetailModal = ref(false)
 const showConfirmDialog = ref(false)
+const showSelectClassModal = ref(false)
+const selectedSantriForClass = ref<Santri | null>(null)
 const confirmOptions = ref<{
   title: string
   description: string
@@ -336,9 +339,8 @@ function getRowItems(row: Row<Santri>) {
       label: 'Pilih Kelas',
       icon: 'i-lucide-book',
       onSelect() {
-        mode.value = 'edit'
-        selectedRow.value = santri
-        showSlideover.value = true
+        selectedSantriForClass.value = santri
+        showSelectClassModal.value = true
       }
     }
   ]
@@ -710,6 +712,24 @@ const handleSantriSaved = () => {
       @close="(confirmed) => {
         showConfirmDialog = false
         if (confirmed && confirmOptions?.action) confirmOptions.action()
+      }"
+    />
+
+    <!-- Select Class Modal -->
+    <SelectClassModal
+      :open="showSelectClassModal"
+      :santri-id="selectedSantriForClass?.id || ''"
+      :santri-name="selectedSantriForClass?.full_name || ''"
+      @close="showSelectClassModal = false"
+      @selected="(classId, className) => {
+        toast.add({
+          title: 'Berhasil',
+          description: `${selectedSantriForClass?.full_name} ditambahkan ke kelas ${className}`,
+          color: 'success',
+          icon: 'i-lucide-check'
+        })
+        fetchSantris()
+        fetchSantriStats()
       }"
     />
   </div>
