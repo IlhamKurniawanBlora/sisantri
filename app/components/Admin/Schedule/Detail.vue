@@ -8,11 +8,12 @@ interface Schedule {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  classes: Array<{
+  classes_id: string | null
+  classes?: {
     id: string
     name: string
     image_url: string | null
-  }>
+  } | null
 }
 
 interface Props {
@@ -138,32 +139,26 @@ function calculateDuration(start: string, end: string) {
     <!-- Classes Section -->
     <div>
       <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-        Kelas Terkait ({{ schedule.classes?.length || 0 }})
+        Kelas Terkait
       </h3>
       
-      <div v-if="schedule.classes && schedule.classes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div
-          v-for="klass in schedule.classes"
-          :key="klass.id"
-          class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
+      <div v-if="schedule.classes" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div 
+          v-if="schedule.classes.image_url"
+          class="w-10 h-10 rounded flex-shrink-0 overflow-hidden"
         >
-          <div 
-            v-if="klass.image_url"
-            class="w-10 h-10 rounded flex-shrink-0 overflow-hidden"
-          >
-            <img 
-              :src="klass.image_url" 
-              :alt="klass.name"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <div v-else class="w-10 h-10 rounded bg-gray-300 dark:bg-gray-600 flex-shrink-0 flex items-center justify-center">
-            <UIcon name="i-lucide-book" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-gray-900 dark:text-white truncate">{{ klass.name }}</p>
-            <p class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ klass.id }}</p>
-          </div>
+          <img 
+            :src="schedule.classes.image_url" 
+            :alt="schedule.classes.name"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div v-else class="w-10 h-10 rounded bg-gray-300 dark:bg-gray-600 flex-shrink-0 flex items-center justify-center">
+          <UIcon name="i-lucide-book" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-gray-900 dark:text-white truncate">{{ schedule.classes.name }}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ schedule.classes.id }}</p>
         </div>
       </div>
 

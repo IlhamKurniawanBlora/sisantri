@@ -24,11 +24,12 @@ interface Schedule {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  classes: Array<{
+  classes_id: string | null
+  classes?: {
     id: string
     name: string
     image_url: string | null
-  }>
+  } | null
 }
 
 // State management
@@ -587,42 +588,29 @@ watch(page, () => {
               <div class="flex items-center gap-2 mb-2">
                 <UIcon name="i-lucide-book" class="w-4 h-4 text-gray-400" />
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Kelas ({{ schedule.classes?.length || 0 }})
+                  Kelas
                 </p>
               </div>
 
-              <!-- Classes List -->
-              <div v-if="schedule.classes && schedule.classes.length > 0" class="space-y-2">
-                <div
-                  v-for="(klass, index) in schedule.classes.slice(0, 3)"
-                  :key="klass.id"
-                  class="flex items-center gap-2 text-sm"
+              <!-- Class Display -->
+              <div v-if="schedule.classes" class="flex items-center gap-2 text-sm">
+                <div 
+                  v-if="schedule.classes.image_url"
+                  class="w-5 h-5 rounded overflow-hidden flex-shrink-0"
                 >
-                  <div 
-                    v-if="klass.image_url"
-                    class="w-5 h-5 rounded overflow-hidden flex-shrink-0"
-                  >
-                    <img 
-                      :src="klass.image_url" 
-                      :alt="klass.name"
-                      class="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div v-else class="w-5 h-5 rounded bg-gray-200 dark:bg-gray-600 flex-shrink-0" />
-                  <span class="text-gray-700 dark:text-gray-300 truncate">
-                    {{ klass.name }}
-                  </span>
+                  <img 
+                    :src="schedule.classes.image_url" 
+                    :alt="schedule.classes.name"
+                    class="w-full h-full object-cover"
+                  />
                 </div>
+                <div v-else class="w-5 h-5 rounded bg-gray-200 dark:bg-gray-600 flex-shrink-0" />
+                <span class="text-gray-700 dark:text-gray-300 truncate">
+                  {{ schedule.classes.name }}
+                </span>
               </div>
 
-              <!-- More Classes Badge -->
-              <div v-if="schedule.classes && schedule.classes.length > 3" class="mt-2">
-                <UBadge variant="soft" color="gray" size="sm">
-                  +{{ schedule.classes.length - 3 }} kelas lainnya
-                </UBadge>
-              </div>
-
-              <div v-else-if="!schedule.classes || schedule.classes.length === 0" class="text-xs text-gray-500 dark:text-gray-400 italic">
+              <div v-else class="text-xs text-gray-500 dark:text-gray-400 italic">
                 Belum ada kelas yang terhubung
               </div>
             </div>

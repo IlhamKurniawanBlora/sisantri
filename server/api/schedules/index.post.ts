@@ -55,6 +55,7 @@ export default defineEventHandler(async (event) => {
         description: body.description || null,
         start_at: startAt.toISOString(),
         end_at: endAt.toISOString(),
+        classes_id: body.classes_id || null,
         updated_at: new Date().toISOString()
       }
 
@@ -64,7 +65,7 @@ export default defineEventHandler(async (event) => {
         .eq('id', body.id)
         .select(`
           *,
-          classes (
+          classes:classes_id (
             id,
             name,
             image_url
@@ -83,6 +84,7 @@ export default defineEventHandler(async (event) => {
       description: body.description || null,
       start_at: startAt.toISOString(),
       end_at: endAt.toISOString(),
+      classes_id: body.classes_id || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -92,7 +94,7 @@ export default defineEventHandler(async (event) => {
       .insert(insertData)
       .select(`
         *,
-        classes (
+        classes:classes_id (
           id,
           name,
           image_url

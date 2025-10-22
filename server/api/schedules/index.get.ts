@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
       .select(
         `
         *,
-        classes (
+        classes:classes_id (
           id,
           name,
           image_url
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
     // ✅ Classes filter (untuk jadwal yang terhubung dengan kelas tertentu)
     if (classesId) {
-      supabaseQuery = supabaseQuery.contains('classes', { id: classesId })
+      supabaseQuery = supabaseQuery.eq('classes_id', classesId)
     }
 
     // ✅ Sorting

@@ -15,11 +15,12 @@ interface Schedule {
   description: string | null
   start_at: string
   end_at: string
-  classes?: Array<{
+  classes_id?: string | null
+  classes?: {
     id: string
     name: string
     image_url: string | null
-  }>
+  }
 }
 
 interface ClassItem {
@@ -53,7 +54,7 @@ const form = ref<Schedule>({
 
 const errors = ref<Record<string, string>>({})
 const allClasses = ref<ClassItem[]>([])
-const selectedClasses = ref<ClassItem[]>([])
+const selectedClassId = ref<string | null>(null)
 
 // Computed property untuk format USelectMenu
 const classOptions = computed(() => {
@@ -74,15 +75,12 @@ watch(() => props.schedule, (schedule) => {
       description: schedule.description,
       start_at: new Date(schedule.start_at).toISOString().slice(0, 16),
       end_at: new Date(schedule.end_at).toISOString().slice(0, 16),
-      classes: schedule.classes
+      classes_id: (schedule as any).classes_id || null,
+      classes: (schedule as any).classes
     }
-    // Map schedule classes to selected classes
-    if (schedule.classes) {
-      selectedClasses.value = schedule.classes.map(klass => ({
-        id: klass.id,
-        name: klass.name,
-        image_url: klass.image_url
-      }))
+    // Set selected class ID
+    if ((schedule as any).classes_id) {
+      selectedClassId.value = (schedule as any).classes_id
     }
   } else {
     form.value = {
@@ -91,7 +89,7 @@ watch(() => props.schedule, (schedule) => {
       start_at: '',
       end_at: ''
     }
-    selectedClasses.value = []
+    selectedClassId.value = null
   }
   errors.value = {}
 }, { immediate: true })
@@ -189,7 +187,7 @@ async function handleSubmit() {
       description: form.value.description,
       start_at: new Date(form.value.start_at).toISOString(),
       end_at: new Date(form.value.end_at).toISOString(),
-      class_ids: selectedClasses.value.map(c => c.id)
+      classes_id: selectedClassId.value || null
     }
 
     await $fetch('/api/schedules', {
@@ -251,16 +249,17 @@ async function handleSubmit() {
 
     <!-- Pilih Kelas -->
     <UFormField label="Pilih Kelas" name="classes_id" class="w-full">
-      <USelectMenu
-        v-model="selectedClasses"
-        :items="classOptions"
-        searchable
-        searchable-placeholder="Cari kelas..."
-        placeholder="Pilih kelas yang akan menggunakan jadwal ini"
+      <USelect
+        v-model="selectedClassId"
+        :items="[
+          { label: 'Tidak ada kelas', value: null },
+          ...classOptions
+        ]"
+        placeholder="Pilih kelas untuk jadwal ini"
         :disabled="loading || loadingClasses"
       />
       <template #help>
-        Pilih satu atau lebih kelas yang akan menggunakan jadwal ini
+        Pilih kelas yang akan menggunakan jadwal ini
       </template>
     </UFormField>
 
@@ -305,35 +304,29 @@ async function handleSubmit() {
       name="classes" 
       class="w-full"
     >
-      <div v-if="form.classes && form.classes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div v-if="form.classes" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-700/50">
         <div
-          v-for="klass in form.classes"
-          :key="klass.id"
-          class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-700/50"
+          v-if="form.classes.image_url"
+          class="w-8 h-8 rounded overflow-hidden flex-shrink-0"
         >
-          <div
-            v-if="klass.image_url"
-            class="w-8 h-8 rounded overflow-hidden flex-shrink-0"
-          >
-            <img
-              :src="klass.image_url"
-              :alt="klass.name"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <div v-else class="w-8 h-8 rounded bg-blue-200 dark:bg-blue-700 flex-shrink-0 flex items-center justify-center">
-            <UIcon name="i-lucide-book" class="w-4 h-4 text-blue-600 dark:text-blue-300" />
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-              {{ klass.name }}
-            </p>
-            <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
-              {{ klass.id }}
-            </p>
-          </div>
-          <UIcon name="i-lucide-check" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          <img
+            :src="form.classes.image_url"
+            :alt="form.classes.name"
+            class="w-full h-full object-cover"
+          />
         </div>
+        <div v-else class="w-8 h-8 rounded bg-blue-200 dark:bg-blue-700 flex-shrink-0 flex items-center justify-center">
+          <UIcon name="i-lucide-book" class="w-4 h-4 text-blue-600 dark:text-blue-300" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+            {{ form.classes.name }}
+          </p>
+          <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+            {{ form.classes.id }}
+          </p>
+        </div>
+        <UIcon name="i-lucide-check" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
       </div>
 
       <!-- No Classes Message -->
@@ -345,7 +338,7 @@ async function handleSubmit() {
       </div>
 
       <template #help>
-        Daftar kelas yang menggunakan jadwal ini
+        Kelas yang menggunakan jadwal ini
       </template>
     </UFormField>
 
