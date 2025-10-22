@@ -210,19 +210,29 @@ const handleReset = () => {
 
 <template>
   <div v-if="isLoggedIn">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <UIcon name="i-lucide-user-cog" class="w-6 h-6" />
-        Pengaturan Profil
-      </h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Kelola informasi profil Anda
-      </p>
-    </div>
-
+    
     <!-- Profile Card -->
     <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center gap-4 mb-4">
+          <UButton
+        icon="i-lucide-arrow-left"
+        variant="ghost"
+        color="neutral"
+        @click="navigateTo('/profile')"
+          />
+          <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <UIcon name="i-lucide-user-cog" class="w-6 h-6" />
+          Pengaturan Profil
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Kelola informasi profil Anda
+        </p>
+          </div>
+        </div>
+      </div>
       <UCard>
         <template #header>
           <div class="flex items-center justify-center gap-3">

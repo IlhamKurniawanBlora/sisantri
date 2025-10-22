@@ -330,11 +330,54 @@ onMounted(async () => {
               class="w-full text-center justify-center"
             >
               <UIcon 
-                :name="santri.accepted_at ? 'i-lucide-check-circle' : 'i-lucide-clock'" 
-                class="w-4 h-4 mr-1" 
+              :name="santri.accepted_at ? 'i-lucide-check-circle' : 'i-lucide-clock'" 
+              class="w-4 h-4 mr-1" 
               />
               {{ santri.accepted_at ? 'Diterima' : 'Menunggu Review' }}
             </UBadge>
+
+            <!-- Status Information -->
+            <UAlert
+              :color="santri.accepted_at ? 'success' : 'warning'"
+                :icon="santri.accepted_at ? 'i-lucide-check-circle' : 'i-lucide-info'"
+              variant="soft"
+              class="mt-4"
+            >
+              <template #title>
+              {{ santri.accepted_at ? 'Selamat!' : 'Konfirmasi Data' }}
+              </template>
+              <template #description>
+              <div class="space-y-2 text-sm">
+                <p v-if="santri.accepted_at">
+                Anda adalah santri dari Pondok Pesantren Dawam.
+                </p>
+                <p v-else>
+                Silahkan datang ke pondok pesantren dan konfirmasi data Anda.
+                </p>
+                
+                <UDivider class="my-2" />
+                
+                <div class="space-y-1">
+                <div class="flex items-start gap-2">
+                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <p class="text-xs">
+                  Malangan UH VII/512 A, RT 039 RW 013<br>
+                  Kel. Giwangan, Kec. Umbulharjo<br>
+                  Kota Yogyakarta. 55163
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-lucide-phone" class="w-4 h-4 flex-shrink-0" />
+                  <p class="text-xs">+62 856-4063-3195</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-lucide-mail" class="w-4 h-4 flex-shrink-0" />
+                  <p class="text-xs">info@SiDawam.id</p>
+                </div>
+                </div>
+              </div>
+              </template>
+            </UAlert>
           </div>
 
           <!-- No Santri Data -->
@@ -377,16 +420,26 @@ onMounted(async () => {
           >
             Edit Profil
           </UButton>
-          <UButton
+            <UButton
             v-if="!santri"
             to="/register-santri"
             color="success"
             variant="soft"
             icon="i-lucide-user-plus"
             block
-          >
+            >
             Daftar Santri
-          </UButton>
+            </UButton>
+            <UButton
+            v-else
+            :to="`/profile/edit-santri/${santri.id}`"
+            color="primary"
+            variant="soft"
+            icon="i-lucide-edit"
+            block
+            >
+            Edit Data Santri
+            </UButton>
         </div>
       </UCard>
     </div>

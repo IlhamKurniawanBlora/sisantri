@@ -263,13 +263,24 @@ const cancelEdit = () => {
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <UIcon name="i-lucide-edit" class="w-6 h-6" />
-        Edit Data Santri
-      </h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Perbarui informasi data santri Anda
-      </p>
+      <div class="flex items-center gap-4 mb-4">
+        <UButton
+          to="/profile"
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-arrow-left"
+          size="sm"
+        />
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <UIcon name="i-lucide-edit" class="w-6 h-6" />
+            Edit Data Santri
+          </h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Perbarui informasi data santri Anda
+          </p>
+        </div>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -663,7 +674,7 @@ const cancelEdit = () => {
               <UAvatar
                 :src="imagePreview || undefined"
                 :alt="santri?.full_name || 'Santri Avatar'"
-                size="xl"
+                size="3xl"
                 class="ring-4 ring-gray-100 dark:ring-gray-800"
               />
             </div>

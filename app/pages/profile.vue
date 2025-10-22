@@ -2,7 +2,6 @@
 // Set middleware for authentication
 definePageMeta({
   middleware: 'guest',
-  layout: 'default'
 })
 
 useHead({
@@ -14,7 +13,7 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen">
     <NuxtPage />
   </div>
 </template>

@@ -378,7 +378,7 @@ if (!santri.deleted_at) {
       confirmOptions.value = {
         title: 'Hapus Permanen Santri',
         description: `Apakah kamu yakin ingin menghapus permanen santri ${santri.full_name}? Tindakan ini tidak dapat dibatalkan.`,
-        variant: 'destructive', // Variasi warna yang lebih tajam untuk tindakan yang tidak dapat dibatalkan
+        variant: 'destructive',
         action: () => deletePermanentSantri(santri.id)
       }
       showConfirmDialog.value = true
@@ -400,28 +400,30 @@ async function deleteSantri(id: string) {
 }
 
 async function deletePermanentSantri(id: string) {
-  confirmOptions.value = {
-    title: 'Hapus Permanen Santri',
-    description: 'Apakah Anda yakin ingin menghapus permanen santri ini? Tindakan ini tidak dapat dibatalkan.',
-    variant: 'destructive',
-    action: async () => {
-      try {
-        const response = await $fetch(`/api/santris/${id}/delete-permanent`, { method: 'DELETE' })
-        
-        // Cek jika berhasil
-        if (response?.success) {
-          toast.add({ title: 'Santri dihapus permanen!', color: 'success', icon: 'i-lucide-trash' })
-          fetchSantris()  // Reload the list of santris
-        } else {
-          throw new Error(response?.message || 'Gagal menghapus santri permanen')
-        }
-      } catch (err: any) {
-        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : 'Gagal menghapus permanen santri'
-        toast.add({ title: message, color: 'error' })
-      }
+  try {
+    const response = await $fetch(`/api/santris/${id}/delete-permanent`, { method: 'DELETE' })
+    
+    // Cek jika berhasil
+    if (response?.success) {
+      toast.add({ title: response.message || 'Santri dihapus permanen!', color: 'success', icon: 'i-lucide-trash' })
+      fetchSantris()
+      fetchSantriStats()
+    } else {
+      throw new Error(response?.message || 'Gagal menghapus santri permanen')
     }
+  } catch (err: any) {
+    let errorMessage = 'Gagal menghapus permanen santri'
+    
+    // Handle different error formats
+    if (err.data?.statusMessage) {
+      errorMessage = err.data.statusMessage
+    } else if (err.message) {
+      errorMessage = err.message
+    }
+    
+    toast.add({ title: errorMessage, color: 'error' })
+    console.error('Delete permanent error:', err)
   }
-  showConfirmDialog.value = true
 }
 
 
